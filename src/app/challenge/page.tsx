@@ -1,3 +1,5 @@
+import Challenge from "@/components/challenge";
+
 export default function ChallengePage() {
-  return <h1>Challenge</h1>;
+  return <Challenge />;
 }
