@@ -1,69 +1,62 @@
-import Image from "next/image";
+import Link from "next/link";
+import { APP_CONFIG } from "@/lib/config";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden px-6 py-16">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:28px_28px]" />
+
+      <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
+
+      <section className="relative mx-auto w-full max-w-3xl text-center">
+        <div className="mb-8">
+          <p className="text-sm font-medium uppercase tracking-[0.28em] text-cyan-300">
+            Today&apos;s Challenge
           </p>
+
+          <p className="mt-3 text-sm text-slate-500">
+            Wednesday • August 6
+          </p>
+
+          <div className="mt-4 flex items-center justify-center gap-4 text-sm text-slate-500">
+            <span>5 stages</span>
+            <span className="h-1 w-1 rounded-full bg-slate-600" />
+            <span>≈5 minutes</span>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <h1 className="text-balance text-5xl font-semibold tracking-[-0.04em] text-white sm:text-7xl">
+          Five minutes.
+          <br />
+          Five challenges.
+          <br />
+          Every day.
+        </h1>
+
+        <p className="mx-auto mt-8 max-w-xl text-lg leading-8 text-slate-400">
+          A new challenge every day. Finish it in five minutes.
+        </p>
+
+        <div className="mt-10">
+          <Link
+            href="/challenge"
+            className="inline-flex min-h-14 items-center justify-center rounded-2xl bg-cyan-300 px-8 font-semibold text-slate-950 hover:-translate-y-0.5 hover:bg-cyan-200"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Start Challenge
+            <span className="ml-3">→</span>
+          </Link>
         </div>
-      </main>
-    </div>
+
+        <p className="mt-5 text-sm text-slate-500">
+          No download required · Finish in about five minutes
+        </p>
+
+        <div className="mt-14 flex items-center justify-center gap-3 text-sm text-slate-600">
+          <span className="h-px w-10 bg-white/10" />
+          <span>{APP_CONFIG.name}</span>
+          <span className="h-px w-10 bg-white/10" />
+        </div>
+      </section>
+    </main>
   );
 }
