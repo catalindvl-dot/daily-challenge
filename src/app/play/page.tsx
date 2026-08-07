@@ -1,3 +1,5 @@
+import Play from "@/components/play/Play";
+
 export default function PlayPage() {
-  return <h1>Play</h1>;
+  return <Play />;
 }
