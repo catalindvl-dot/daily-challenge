@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { dailyChallenge } from "@/data/dailyChallenge";
 import type { StageResult } from "@/types/challenge";
 import FlightPath from "@/components/play/FlightPath";
+import PriceGuess from "@/components/play/PriceGuess";
+import Timeline from "@/components/play/Timeline";
+import VisualReveal from "@/components/play/VisualReveal";
+import Connection from "@/components/play/Connection";
 
 export default function Play() {
   const router = useRouter();
@@ -14,6 +18,18 @@ export default function Play() {
   const [results, setResults] = useState<StageResult[]>([]);
 
   const stage = dailyChallenge[currentStage - 1];
+  const handleStageComplete = (score: number) => {
+    setResults((currentResults) => [
+      ...currentResults.filter((result) => result.stageId !== stage.id),
+      {
+        stageId: stage.id,
+        gameType: stage.type,
+        score,
+      },
+    ]);
+
+    setStageCompleted(true);
+  };
 
   return (
     <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-6 py-16">
@@ -39,20 +55,15 @@ export default function Play() {
 
         <div className="mt-12 rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center">
           {stage.type === "flight-path" ? (
-            <FlightPath
-              onComplete={(accuracy) => {
-                setResults((currentResults) => [
-                  ...currentResults.filter((result) => result.stageId !== stage.id),
-                  {
-                    stageId: stage.id,
-                    gameType: stage.type,
-                    score: accuracy,
-                  },
-                ]);
-
-                setStageCompleted(true);
-              }}
-            />
+            <FlightPath onComplete={handleStageComplete} />
+          ) : stage.type === "price-guess" ? (
+            <PriceGuess onComplete={handleStageComplete} />
+          ) : stage.type === "timeline" ? (
+            <Timeline onComplete={handleStageComplete} />
+          ) : stage.type === "visual-reveal" ? (
+            <VisualReveal onComplete={handleStageComplete} />
+          ) : stage.type === "connection" ? (
+            <Connection onComplete={handleStageComplete} />
           ) : (
             <>
               <p className="text-sm font-medium uppercase tracking-[0.24em] text-slate-500">
