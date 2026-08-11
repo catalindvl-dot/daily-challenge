@@ -13,22 +13,45 @@ import Connection from "@/components/play/Connection";
 export default function Play() {
   const router = useRouter();
   const totalStages = dailyChallenge.length;
+
   const [currentStage, setCurrentStage] = useState(1);
   const [stageCompleted, setStageCompleted] = useState(false);
   const [results, setResults] = useState<StageResult[]>([]);
 
   const stage = dailyChallenge[currentStage - 1];
+
   const handleStageComplete = (score: number) => {
-    setResults((currentResults) => [
-      ...currentResults.filter((result) => result.stageId !== stage.id),
-      {
-        stageId: stage.id,
-        gameType: stage.type,
-        score,
-      },
-    ]);
+    setResults((currentResults) => {
+      const updatedResults = [
+        ...currentResults.filter((result) => result.stageId !== stage.id),
+        {
+          stageId: stage.id,
+          gameType: stage.type,
+          score,
+        },
+      ];
+
+      sessionStorage.setItem(
+        "dailyChallengeResults",
+        JSON.stringify(updatedResults),
+      );
+
+      return updatedResults;
+    });
 
     setStageCompleted(true);
+  };
+
+  const handleContinue = () => {
+    if (!stageCompleted) return;
+
+    if (currentStage === totalStages) {
+      router.push("/summary");
+      return;
+    }
+
+    setCurrentStage((current) => current + 1);
+    setStageCompleted(false);
   };
 
   return (
@@ -82,26 +105,16 @@ export default function Play() {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <div className="mt-8 flex justify-center">
-            <button
-              type="button"
-              disabled={!stageCompleted}
-              onClick={() => {
-                if (!stageCompleted) return;
-
-                if (currentStage === totalStages) {
-                  router.push("/summary");
-                  return;
-                }
-
-                setCurrentStage((stage) => stage + 1);
-                setStageCompleted(false);
-              }}
-              className="rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
-            >
-              {currentStage === totalStages ? "Finish Challenge →" : "Continue →"}
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled={!stageCompleted}
+            onClick={handleContinue}
+            className="rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            {currentStage === totalStages
+              ? "Finish Challenge →"
+              : "Continue →"}
+          </button>
         </div>
       </div>
     </main>
