@@ -10,7 +10,9 @@ export type ChallengeStage = {
   type: GameType;
   title: string;
   description: string;
+  contentId: string;
 };
+
 export type StageResult = {
   stageId: number;
   gameType: GameType;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { dailyChallenge } from "@/data/dailyChallenge";
+import { getDailyChallenge } from "@/data/dailyChallenge";
 import type { StageResult } from "@/types/challenge";
 import FlightPath from "@/components/play/FlightPath";
 import PriceGuess from "@/components/play/PriceGuess";
@@ -12,6 +12,20 @@ import Connection from "@/components/play/Connection";
 
 export default function Play() {
   const router = useRouter();
+  const today = "2026-08-13";
+  const challenge = getDailyChallenge(today);
+
+  if (!challenge) {
+    return (
+      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-6">
+        <p className="text-slate-400">
+          No challenge available for today.
+        </p>
+      </main>
+    );
+  }
+
+  const dailyChallenge = challenge.stages;
   const totalStages = dailyChallenge.length;
 
   const [currentStage, setCurrentStage] = useState(1);
@@ -78,9 +92,15 @@ export default function Play() {
 
         <div className="mt-12 rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center">
           {stage.type === "flight-path" ? (
-            <FlightPath onComplete={handleStageComplete} />
+            <FlightPath
+              contentId={stage.contentId}
+              onComplete={handleStageComplete}
+            />
           ) : stage.type === "price-guess" ? (
-            <PriceGuess onComplete={handleStageComplete} />
+            <PriceGuess
+              contentId={stage.contentId}
+              onComplete={handleStageComplete}
+            />
           ) : stage.type === "timeline" ? (
             <Timeline onComplete={handleStageComplete} />
           ) : stage.type === "visual-reveal" ? (

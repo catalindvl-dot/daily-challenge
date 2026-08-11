@@ -1,15 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { priceGuessChallenge } from "@/data/priceGuess";
+import { getPriceGuessChallenge } from "@/data/priceGuess";
 
 type PriceGuessProps = {
+  contentId: string;
   onComplete: (accuracy: number) => void;
 };
 
-export default function PriceGuess({ onComplete }: PriceGuessProps) {
-  const [guess, setGuess] = useState(priceGuessChallenge.startingGuess);
+export default function PriceGuess({
+  contentId,
+  onComplete,
+}: PriceGuessProps) {
+  const priceGuessChallenge = getPriceGuessChallenge(contentId);
+
+  const [guess, setGuess] = useState(
+    priceGuessChallenge?.startingGuess ?? 0,
+  );
   const [isLocked, setIsLocked] = useState(false);
+
+  if (!priceGuessChallenge) {
+    return (
+      <p className="text-sm text-slate-400">
+        Price Guess challenge not found.
+      </p>
+    );
+  }
 
   const accuracy = Math.max(
     0,
