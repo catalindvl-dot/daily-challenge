@@ -10,17 +10,22 @@ export default function Summary() {
   const today = new Intl.DateTimeFormat("en-CA").format(new Date());
   const challenge = getDailyChallenge(today);
   const dailyChallenge = challenge?.stages ?? [];
+
   const [results, setResults] = useState<StageResult[]>([]);
 
   useEffect(() => {
-    const storedResults = sessionStorage.getItem(
-      "dailyChallengeResults",
+    const storedResults = localStorage.getItem(
+      `dailyChallengeResults:${today}`,
     );
 
     if (!storedResults) return;
 
-    setResults(JSON.parse(storedResults));
-  }, []);
+    try {
+      setResults(JSON.parse(storedResults));
+    } catch {
+      setResults([]);
+    }
+  }, [today]);
 
   const totalScore = useMemo(() => {
     if (results.length === 0) return 0;

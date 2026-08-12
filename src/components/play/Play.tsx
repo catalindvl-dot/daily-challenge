@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getDailyChallenge } from "@/data/dailyChallenge";
 import type { StageResult } from "@/types/challenge";
@@ -12,10 +12,63 @@ import Connection from "@/components/play/Connection";
 
 export default function Play() {
   const router = useRouter();
+
   const today = new Intl.DateTimeFormat("en-CA").format(new Date());
   const challenge = getDailyChallenge(today);
 
-  if (!challenge) {
+  const dailyChallenge = challenge?.stages ?? [];
+  const totalStages = dailyChallenge.length;
+
+  const [currentStage, setCurrentStage] = useState(1);
+  const [stageCompleted, setStageCompleted] = useState(false);
+  const [results, setResults] = useState<StageResult[]>([]);
+  const [isCheckingProgress, setIsCheckingProgress] = useState(true);
+
+  useEffect(() => {
+    const isCompleted =
+      localStorage.getItem(`dailyChallengeCompleted:${today}`) === "true";
+
+    if (isCompleted) {
+      router.replace("/summary");
+      return;
+    }
+
+    const storedResults = localStorage.getItem(
+      `dailyChallengeResults:${today}`,
+    );
+
+    if (storedResults) {
+      try {
+        setResults(JSON.parse(storedResults));
+      } catch {
+        setResults([]);
+      }
+    }
+
+    const storedStage = localStorage.getItem(
+      `dailyChallengeStage:${today}`,
+    );
+
+    if (storedStage) {
+      const parsedStage = Number(storedStage);
+
+      if (
+        Number.isInteger(parsedStage) &&
+        parsedStage >= 1 &&
+        parsedStage <= totalStages
+      ) {
+        setCurrentStage(parsedStage);
+      }
+    }
+
+    setIsCheckingProgress(false);
+  }, [router, today, totalStages]);
+
+  if (isCheckingProgress) {
+    return null;
+  }
+
+  if (!challenge || totalStages === 0) {
     return (
       <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-6">
         <p className="text-slate-400">
@@ -25,19 +78,14 @@ export default function Play() {
     );
   }
 
-  const dailyChallenge = challenge.stages;
-  const totalStages = dailyChallenge.length;
-
-  const [currentStage, setCurrentStage] = useState(1);
-  const [stageCompleted, setStageCompleted] = useState(false);
-  const [results, setResults] = useState<StageResult[]>([]);
-
   const stage = dailyChallenge[currentStage - 1];
 
   const handleStageComplete = (score: number) => {
     setResults((currentResults) => {
       const updatedResults = [
-        ...currentResults.filter((result) => result.stageId !== stage.id),
+        ...currentResults.filter(
+          (result) => result.stageId !== stage.id,
+        ),
         {
           stageId: stage.id,
           gameType: stage.type,
@@ -45,8 +93,8 @@ export default function Play() {
         },
       ];
 
-      sessionStorage.setItem(
-        "dailyChallengeResults",
+      localStorage.setItem(
+        `dailyChallengeResults:${today}`,
         JSON.stringify(updatedResults),
       );
 
@@ -60,11 +108,27 @@ export default function Play() {
     if (!stageCompleted) return;
 
     if (currentStage === totalStages) {
+      localStorage.setItem(
+        `dailyChallengeCompleted:${today}`,
+        "true",
+      );
+
+      localStorage.removeItem(
+        `dailyChallengeStage:${today}`,
+      );
+
       router.push("/summary");
       return;
     }
 
-    setCurrentStage((current) => current + 1);
+    const nextStage = currentStage + 1;
+
+    localStorage.setItem(
+      `dailyChallengeStage:${today}`,
+      String(nextStage),
+    );
+
+    setCurrentStage(nextStage);
     setStageCompleted(false);
   };
 
