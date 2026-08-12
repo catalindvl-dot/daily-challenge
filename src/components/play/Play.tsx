@@ -12,7 +12,7 @@ import Connection from "@/components/play/Connection";
 
 export default function Play() {
   const router = useRouter();
-  const today = "2026-08-13";
+  const today = new Intl.DateTimeFormat("en-CA").format(new Date());
   const challenge = getDailyChallenge(today);
 
   if (!challenge) {
@@ -102,11 +102,20 @@ export default function Play() {
               onComplete={handleStageComplete}
             />
           ) : stage.type === "timeline" ? (
-            <Timeline onComplete={handleStageComplete} />
+            <Timeline
+              contentId={stage.contentId}
+              onComplete={handleStageComplete}
+            />
           ) : stage.type === "visual-reveal" ? (
-            <VisualReveal onComplete={handleStageComplete} />
+            <VisualReveal
+              contentId={stage.contentId}
+              onComplete={handleStageComplete}
+            />
           ) : stage.type === "connection" ? (
-            <Connection onComplete={handleStageComplete} />
+            <Connection
+              contentId={stage.contentId}
+              onComplete={handleStageComplete}
+            />
           ) : (
             <>
               <p className="text-sm font-medium uppercase tracking-[0.24em] text-slate-500">

@@ -1,16 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { connectionChallenge } from "@/data/connection";
+import { getConnectionChallenge } from "@/data/connection";
 import { fuzzyMatch } from "@/utils/fuzzyMatch";
 
 type ConnectionProps = {
+  contentId: string;
   onComplete: (score: number) => void;
 };
 
 const scoreLevels = [100, 75, 50, 25];
 
-export default function Connection({ onComplete }: ConnectionProps) {
+export default function Connection({
+  contentId,
+  onComplete,
+}: ConnectionProps) {
+  const connectionChallenge = getConnectionChallenge(contentId);
+
   const [visibleClues, setVisibleClues] = useState(1);
   const [guess, setGuess] = useState("");
   const [wrongGuesses, setWrongGuesses] = useState(0);
@@ -18,11 +24,21 @@ export default function Connection({ onComplete }: ConnectionProps) {
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [finalScore, setFinalScore] = useState<number | null>(null);
 
+  if (!connectionChallenge) {
+    return (
+      <p className="text-sm text-slate-400">
+        Connection challenge not found.
+      </p>
+    );
+  }
+
   const calculateScore = (extraPenalty = 0) => {
     const penalties =
       visibleClues - 1 + wrongGuesses + extraPenalty;
 
-    return scoreLevels[Math.min(penalties, scoreLevels.length - 1)];
+    return scoreLevels[
+      Math.min(penalties, scoreLevels.length - 1)
+    ];
   };
 
   const handleSubmit = () => {

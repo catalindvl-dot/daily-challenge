@@ -1,20 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { timelineChallenge } from "@/data/timeline";
+import { getTimelineChallenge } from "@/data/timeline";
 import type { TimelineEvent } from "@/types/timeline";
 
 type TimelineProps = {
+  contentId: string;
   onComplete: (score: number) => void;
 };
 
-export default function Timeline({ onComplete }: TimelineProps) {
+export default function Timeline({
+  contentId,
+  onComplete,
+}: TimelineProps) {
+  const timelineChallenge = getTimelineChallenge(contentId);
+
   const [events, setEvents] = useState<TimelineEvent[]>(
-    [...timelineChallenge.events].reverse(),
+    () => [...(timelineChallenge?.events ?? [])].reverse(),
   );
 
   const [isLocked, setIsLocked] = useState(false);
   const [score, setScore] = useState<number | null>(null);
+
+  if (!timelineChallenge) {
+    return (
+      <p className="text-sm text-slate-400">
+        Timeline challenge not found.
+      </p>
+    );
+  }
 
   const moveEvent = (index: number, direction: -1 | 1) => {
     const newIndex = index + direction;
@@ -73,7 +87,9 @@ export default function Timeline({ onComplete }: TimelineProps) {
               <p className="font-medium text-white">{event.title}</p>
 
               {isLocked && (
-                <p className="mt-1 text-sm text-cyan-300">{event.year}</p>
+                <p className="mt-1 text-sm text-cyan-300">
+                  {event.year}
+                </p>
               )}
             </div>
 
@@ -105,15 +121,18 @@ export default function Timeline({ onComplete }: TimelineProps) {
       {isLocked && score !== null && (
         <div className="mt-8">
           <p
-            className={`text-lg font-semibold ${score === 100 ? "text-cyan-300" : "text-slate-300"
-              }`}
+            className={`text-lg font-semibold ${
+              score === 100 ? "text-cyan-300" : "text-slate-300"
+            }`}
           >
             {score === 100
               ? "Perfect! You got the timeline right."
               : "Not quite. Here’s the correct timeline."}
           </p>
 
-          <p className="mt-2 text-sm text-slate-500">Score: {score}%</p>
+          <p className="mt-2 text-sm text-slate-500">
+            Score: {score}%
+          </p>
         </div>
       )}
 

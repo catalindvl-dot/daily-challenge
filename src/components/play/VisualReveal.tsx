@@ -1,16 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { visualRevealChallenge } from "@/data/visualReveal";
+import { getVisualRevealChallenge } from "@/data/visualReveal";
 import { fuzzyMatch } from "@/utils/fuzzyMatch";
 
 type VisualRevealProps = {
+  contentId: string;
   onComplete: (score: number) => void;
 };
 
 const revealScores = [100, 75, 50, 25];
 
-export default function VisualReveal({ onComplete }: VisualRevealProps) {
+export default function VisualReveal({
+  contentId,
+  onComplete,
+}: VisualRevealProps) {
+  const visualRevealChallenge =
+    getVisualRevealChallenge(contentId);
+
   const [revealLevel, setRevealLevel] = useState(0);
   const [guess, setGuess] = useState("");
   const [isComplete, setIsComplete] = useState(false);
@@ -22,6 +29,14 @@ export default function VisualReveal({ onComplete }: VisualRevealProps) {
     "blur-md scale-100",
     "blur-none scale-100",
   ];
+
+  if (!visualRevealChallenge) {
+    return (
+      <p className="text-sm text-slate-400">
+        Visual Reveal challenge not found.
+      </p>
+    );
+  }
 
   const handleSubmit = () => {
     if (!guess.trim() || isComplete) return;
@@ -77,7 +92,8 @@ export default function VisualReveal({ onComplete }: VisualRevealProps) {
           <img
             src={visualRevealChallenge.image}
             alt=""
-            className={`h-full w-full object-cover transition-all duration-500 ${blurClasses[revealLevel]}`}
+            className={`h-full w-full object-cover transition-all duration-500 ${isComplete ? "blur-none scale-100" : blurClasses[revealLevel]
+              }`}
           />
         </div>
       </div>

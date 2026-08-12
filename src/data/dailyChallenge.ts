@@ -50,7 +50,7 @@ const august13Stages: ChallengeStage[] = [
     type: "timeline",
     title: "Timeline",
     description: "Put the events in the correct order.",
-    contentId: "tech-history",
+    contentId: "space-history",
   },
   {
     id: 2,
@@ -64,7 +64,7 @@ const august13Stages: ChallengeStage[] = [
     type: "connection",
     title: "Connection",
     description: "Find what connects the clues.",
-    contentId: "planets",
+    contentId: "social-media",
   },
   {
     id: 4,
@@ -78,7 +78,7 @@ const august13Stages: ChallengeStage[] = [
     type: "visual-reveal",
     title: "Visual Reveal",
     description: "Can you recognize it before the full reveal?",
-    contentId: "eiffel-tower",
+    contentId: "statue-of-liberty",
   },
 ];
 

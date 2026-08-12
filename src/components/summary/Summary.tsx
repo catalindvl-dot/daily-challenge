@@ -7,7 +7,7 @@ import { getDailyChallenge } from "@/data/dailyChallenge";
 import type { StageResult } from "@/types/challenge";
 
 export default function Summary() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Intl.DateTimeFormat("en-CA").format(new Date());
   const challenge = getDailyChallenge(today);
   const dailyChallenge = challenge?.stages ?? [];
   const [results, setResults] = useState<StageResult[]>([]);
