@@ -9,6 +9,7 @@ import PriceGuess from "@/components/play/PriceGuess";
 import Timeline from "@/components/play/Timeline";
 import VisualReveal from "@/components/play/VisualReveal";
 import Connection from "@/components/play/Connection";
+import { updateStreak } from "@/utils/streak";
 
 export default function Play() {
   const router = useRouter();
@@ -116,6 +117,8 @@ export default function Play() {
       localStorage.removeItem(
         `dailyChallengeStage:${today}`,
       );
+
+      updateStreak(today);
 
       router.push("/summary");
       return;

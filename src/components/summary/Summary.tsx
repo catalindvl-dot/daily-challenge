@@ -5,6 +5,7 @@ import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import { getDailyChallenge } from "@/data/dailyChallenge";
 import type { StageResult } from "@/types/challenge";
+import { getStreak, type StreakData } from "@/utils/streak";
 
 export default function Summary() {
   const today = new Intl.DateTimeFormat("en-CA").format(new Date());
@@ -12,19 +13,29 @@ export default function Summary() {
   const dailyChallenge = challenge?.stages ?? [];
 
   const [results, setResults] = useState<StageResult[]>([]);
+  const [streak, setStreak] = useState<StreakData>({
+    currentStreak: 0,
+    bestStreak: 0,
+    lastCompletedDate: null,
+  });
+  const [shareStatus, setShareStatus] = useState<
+    "idle" | "copied"
+  >("idle");
 
   useEffect(() => {
     const storedResults = localStorage.getItem(
       `dailyChallengeResults:${today}`,
     );
 
-    if (!storedResults) return;
-
-    try {
-      setResults(JSON.parse(storedResults));
-    } catch {
-      setResults([]);
+    if (storedResults) {
+      try {
+        setResults(JSON.parse(storedResults));
+      } catch {
+        setResults([]);
+      }
     }
+
+    setStreak(getStreak());
   }, [today]);
 
   const totalScore = useMemo(() => {
@@ -37,6 +48,75 @@ export default function Summary() {
 
     return Math.round(sum / results.length);
   }, [results]);
+  const getScoreSquare = (score: number) => {
+    if (score >= 90) return "🟩";
+    if (score >= 70) return "🟨";
+    if (score >= 40) return "🟧";
+
+    return "🟥";
+  };
+  const handleShare = async () => {
+    const formattedShareDate = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+    }).format(new Date());
+
+    const squares = dailyChallenge
+      .map((stage) => {
+        const result = results.find(
+          (item) => item.stageId === stage.id,
+        );
+
+        return getScoreSquare(result?.score ?? 0);
+      })
+      .join(" ");
+
+    const streakText =
+      streak.currentStreak === 1
+        ? "🔥 1 day streak"
+        : `🔥 ${streak.currentStreak} day streak`;
+
+    const shareText = [
+      "GuessHub Daily Challenge",
+      formattedShareDate,
+      "",
+      squares,
+      "",
+      `Score: ${totalScore}%`,
+      streakText,
+      "",
+      "Can you beat my score?",
+    ].join("\n");
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          text: shareText,
+        });
+
+        return;
+      } catch (error) {
+        if (
+          error instanceof DOMException &&
+          error.name === "AbortError"
+        ) {
+          return;
+        }
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+
+      setShareStatus("copied");
+
+      window.setTimeout(() => {
+        setShareStatus("idle");
+      }, 2000);
+    } catch {
+      setShareStatus("idle");
+    }
+  };
 
   return (
     <main className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden px-6 py-16">
@@ -64,8 +144,31 @@ export default function Summary() {
             {totalScore}%
           </p>
         </div>
+        <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-3">
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              Current Streak
+            </p>
 
-        <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-3 sm:grid-cols-5">
+            <p className="mt-2 text-2xl font-semibold text-white">
+              🔥 {streak.currentStreak}{" "}
+              {streak.currentStreak === 1 ? "day" : "days"}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+              Best Streak
+            </p>
+
+            <p className="mt-2 text-2xl font-semibold text-white">
+              🏆 {streak.bestStreak}{" "}
+              {streak.bestStreak === 1 ? "day" : "days"}
+            </p>
+          </div>
+        </div>
+
+        <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-5">
           {dailyChallenge.map((stage) => {
             const result = results.find(
               (item) => item.stageId === stage.id,
@@ -74,7 +177,7 @@ export default function Summary() {
             return (
               <div
                 key={stage.id}
-                className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-4"
+                className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-5"
               >
                 <p className="text-xs uppercase tracking-wider text-slate-500">
                   Stage {stage.id}
@@ -92,8 +195,41 @@ export default function Summary() {
           })}
         </div>
 
-        <div className="mt-10">
-          <Button href="/">Done →</Button>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={handleShare}
+            className="flex min-w-48 items-center justify-center gap-3 rounded-xl bg-cyan-300 px-8 py-3.5 font-medium text-slate-950 transition hover:bg-cyan-200"
+          >
+            {shareStatus === "copied" ? (
+              "Copied! ✓"
+            ) : (
+              <>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="h-6 w-6"
+                  stroke="currentColor"
+                  strokeWidth="2.25"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M7 17L17 7" />
+                  <path d="M8 7h9v9" />
+                </svg>
+
+                <span>Share Results</span>
+              </>
+            )}
+          </button>
+
+          <a
+            href="/"
+            className="min-w-28 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-3.5 font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white"
+          >
+            Done
+          </a>
         </div>
       </Container>
     </main>
