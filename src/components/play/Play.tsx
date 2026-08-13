@@ -10,6 +10,7 @@ import Timeline from "@/components/play/Timeline";
 import VisualReveal from "@/components/play/VisualReveal";
 import Connection from "@/components/play/Connection";
 import { updateStreak } from "@/utils/streak";
+import { saveChallengeHistoryEntry } from "@/utils/history";
 
 export default function Play() {
   const router = useRouter();
@@ -109,6 +110,8 @@ export default function Play() {
     if (!stageCompleted) return;
 
     if (currentStage === totalStages) {
+      saveChallengeHistoryEntry(today, results);
+
       localStorage.setItem(
         `dailyChallengeCompleted:${today}`,
         "true",
@@ -117,8 +120,6 @@ export default function Play() {
       localStorage.removeItem(
         `dailyChallengeStage:${today}`,
       );
-
-      updateStreak(today);
 
       router.push("/summary");
       return;

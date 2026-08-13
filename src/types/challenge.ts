@@ -18,3 +18,8 @@ export type StageResult = {
   gameType: GameType;
   score: number;
 };
+export type DailyChallengeHistoryEntry = {
+  date: string;
+  totalScore: number;
+  results: StageResult[];
+};
