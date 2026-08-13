@@ -9,6 +9,7 @@ import { APP_CONFIG } from "@/lib/config";
 export default function ChallengeIntro() {
   const [isVisible, setIsVisible] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [hasProgress, setHasProgress] = useState(false);
 
   const today = new Intl.DateTimeFormat("en-CA").format(new Date());
 
@@ -22,7 +23,12 @@ export default function ChallengeIntro() {
     const completed =
       localStorage.getItem(`dailyChallengeCompleted:${today}`) === "true";
 
+    const savedStage = localStorage.getItem(
+      `dailyChallengeStage:${today}`,
+    );
+
     setIsCompleted(completed);
+    setHasProgress(!completed && savedStage !== null);
 
     const frame = requestAnimationFrame(() => {
       setIsVisible(true);
@@ -67,13 +73,17 @@ export default function ChallengeIntro() {
           <p className="text-3xl font-semibold tracking-tight text-white">
             {isCompleted
               ? "Today's challenge is complete."
-              : "A new challenge is ready."}
+              : hasProgress
+                ? "Your challenge is in progress."
+                : "A new challenge is ready."}
           </p>
 
           <p className="mt-4 text-slate-400">
             {isCompleted
               ? "Your score is saved. Come back tomorrow for a new challenge."
-              : "Complete all five stages to finish today's challenge."}
+              : hasProgress
+                ? "Pick up where you left off and complete today's challenge."
+                : "Complete all five stages to finish today's challenge."}
           </p>
         </div>
 
@@ -81,6 +91,10 @@ export default function ChallengeIntro() {
           {isCompleted ? (
             <Button href="/summary">
               View Results →
+            </Button>
+          ) : hasProgress ? (
+            <Button href="/play">
+              Continue Challenge →
             </Button>
           ) : (
             <Button href="/play">
