@@ -12,7 +12,7 @@ const defaultStreak: StreakData = {
   lastCompletedDate: null,
 };
 
-export function getStreak(): StreakData {
+export function getStreak(today?: string): StreakData {
   const storedStreak = localStorage.getItem(STREAK_STORAGE_KEY);
 
   if (!storedStreak) {
@@ -20,7 +20,28 @@ export function getStreak(): StreakData {
   }
 
   try {
-    return JSON.parse(storedStreak) as StreakData;
+    const streak = JSON.parse(storedStreak) as StreakData;
+
+    if (!today || !streak.lastCompletedDate) {
+      return streak;
+    }
+
+    const previousDate = new Date(`${streak.lastCompletedDate}T12:00:00`);
+    const currentDate = new Date(`${today}T12:00:00`);
+
+    const differenceInDays = Math.round(
+      (currentDate.getTime() - previousDate.getTime()) /
+      (1000 * 60 * 60 * 24),
+    );
+
+    if (differenceInDays > 1) {
+      return {
+        ...streak,
+        currentStreak: 0,
+      };
+    }
+
+    return streak;
   } catch {
     return defaultStreak;
   }
@@ -41,7 +62,7 @@ export function updateStreak(today: string): StreakData {
 
     const differenceInDays = Math.round(
       (currentDate.getTime() - previousDate.getTime()) /
-        (1000 * 60 * 60 * 24),
+      (1000 * 60 * 60 * 24),
     );
 
     if (differenceInDays === 1) {

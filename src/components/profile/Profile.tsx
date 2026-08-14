@@ -32,8 +32,10 @@ export default function Profile() {
     useEffect(() => {
         const history = backfillChallengeHistory();
 
+        const today = new Date().toISOString().split("T")[0];
+
         setStats(calculateChallengeStats(history));
-        setStreak(getStreak());
+        setStreak(getStreak(today));
     }, []);
 
     return (
