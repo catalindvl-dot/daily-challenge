@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import AuthNav from "@/components/shared/AuthNav";
+import { getCurrentUser } from "@/utils/supabase/getCurrentUser";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,21 +16,38 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GuessHub",
-  description: "Five minutes. Five challenges. Every day.",
+  title: "Kaxiro",
+  description: "Where curiosity comes to play.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const user = await getCurrentUser();
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <header className="relative z-50 border-b border-white/5">
+          <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
+            <Link
+              href="/"
+              className="text-lg font-semibold tracking-tight text-white"
+            >
+              Kaxiro
+            </Link>
+
+            <AuthNav isLoggedIn={Boolean(user)} />
+          </div>
+        </header>
+
+        {children}
+      </body>
     </html>
   );
 }

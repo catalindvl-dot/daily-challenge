@@ -7,6 +7,7 @@ import { calculateChallengeStats } from "@/utils/stats";
 import { getStreak, type StreakData } from "@/utils/streak";
 import type { ChallengeStats } from "@/utils/stats";
 
+
 const gameLabels: Record<string, string> = {
     "flight-path": "Flight Path",
     "price-guess": "Price Guess",
@@ -16,6 +17,7 @@ const gameLabels: Record<string, string> = {
 };
 
 export default function Profile() {
+    
     const [stats, setStats] = useState<ChallengeStats>({
         challengesPlayed: 0,
         averageScore: 0,
@@ -37,12 +39,14 @@ export default function Profile() {
         setStats(calculateChallengeStats(history));
         setStreak(getStreak(today));
     }, []);
+    
 
     return (
         <main className="relative min-h-screen overflow-hidden px-6 py-16">
             <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
 
             <Container className="relative max-w-4xl">
+                
                 <div className="text-center">
                     <p className="text-sm font-medium uppercase tracking-[0.28em] text-cyan-300">
                         Your Profile
