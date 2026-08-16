@@ -18,7 +18,7 @@ export async function saveChallengeResult(
 
   const totalScore = Math.round(
     results.reduce((sum, result) => sum + result.score, 0) /
-      results.length,
+    results.length,
   );
 
   const { data: challengeResult, error: challengeError } =
@@ -33,6 +33,13 @@ export async function saveChallengeResult(
       .single();
 
   if (challengeError) {
+    console.error("Challenge result insert error:", {
+      code: challengeError.code,
+      message: challengeError.message,
+      details: challengeError.details,
+      hint: challengeError.hint,
+    });
+
     throw challengeError;
   }
 

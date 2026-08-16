@@ -11,6 +11,7 @@ import VisualReveal from "@/components/play/VisualReveal";
 import Connection from "@/components/play/Connection";
 import { updateStreak } from "@/utils/streak";
 import { saveChallengeHistoryEntry } from "@/utils/history";
+import { saveChallengeResult } from "@/utils/supabase/saveChallengeResult";
 
 export default function Play() {
   const router = useRouter();
@@ -106,11 +107,16 @@ export default function Play() {
     setStageCompleted(true);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!stageCompleted) return;
 
     if (currentStage === totalStages) {
       saveChallengeHistoryEntry(today, results);
+      try {
+        await saveChallengeResult(today, results);
+      } catch (error) {
+        console.error("Failed to save challenge result to Supabase:", error);
+      }
 
       localStorage.setItem(
         `dailyChallengeCompleted:${today}`,

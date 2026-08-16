@@ -93,12 +93,15 @@ export const dailyChallenges: DailyChallenge[] = [
     date: "2026-08-13",
     stages: august13Stages,
   },
+  {
+    id: "2026-08-16",
+    date: "2026-08-16",
+    stages: august12Stages,
+  },
 ];
 
 export function getDailyChallenge(date: string) {
-  const challenge = dailyChallenges.find(
+  return dailyChallenges.find(
     (challenge) => challenge.date === date,
   );
-
-  return challenge ?? dailyChallenges[0];
 }
