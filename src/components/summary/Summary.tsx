@@ -5,37 +5,103 @@ import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import { getDailyChallenge } from "@/data/dailyChallenge";
 import type { StageResult } from "@/types/challenge";
-import { getStreak, type StreakData } from "@/utils/streak";
+import type { StreakData } from "@/utils/streak";
+import { createClient } from "@/utils/supabase/client";
+import { getChallengeHistoryFromSupabase } from "@/utils/supabase/getChallengeHistory";
+import { calculateSupabaseStreak } from "@/utils/supabase/calculateSupabaseStreak";
+import { getGuestStorageId } from "@/utils/guest";
+import { getKaxiroDate } from "@/utils/date";
 
 export default function Summary() {
-  const today = new Intl.DateTimeFormat("en-CA").format(new Date());
+  const today = getKaxiroDate();
   const challenge = getDailyChallenge(today);
   const dailyChallenge = challenge?.stages ?? [];
 
   const [results, setResults] = useState<StageResult[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [streak, setStreak] = useState<StreakData>({
     currentStreak: 0,
     bestStreak: 0,
     lastCompletedDate: null,
   });
+
   const [shareStatus, setShareStatus] = useState<
     "idle" | "copied"
   >("idle");
 
   useEffect(() => {
-    const storedResults = localStorage.getItem(
-      `dailyChallengeResults:${today}`,
-    );
+    const supabase = createClient();
 
-    if (storedResults) {
-      try {
-        setResults(JSON.parse(storedResults));
-      } catch {
-        setResults([]);
+    async function loadSummary() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        setIsLoggedIn(true);
+
+        const { data: challengeResult, error: challengeError } =
+          await supabase
+            .from("challenge_results")
+            .select(`
+              id,
+              total_score,
+              stage_results (
+                stage_id,
+                game_type,
+                score
+              )
+            `)
+            .eq("user_id", user.id)
+            .eq("challenge_date", today)
+            .maybeSingle();
+
+        if (challengeError) {
+          console.error(
+            "Failed to load summary result:",
+            challengeError,
+          );
+        }
+
+        if (challengeResult) {
+          setResults(
+            (challengeResult.stage_results ?? []).map((result) => ({
+              stageId: result.stage_id,
+              gameType: result.game_type,
+              score: result.score,
+            })),
+          );
+        }
+
+        const history = await getChallengeHistoryFromSupabase();
+
+        setStreak(
+          calculateSupabaseStreak(history, today),
+        );
+      } else {
+        setIsLoggedIn(false);
+
+        const guestStorageId = getGuestStorageId();
+
+        const storedResults = localStorage.getItem(
+          `dailyChallengeResults:${guestStorageId}:${today}`,
+        );
+
+        if (storedResults) {
+          try {
+            setResults(JSON.parse(storedResults));
+          } catch {
+            setResults([]);
+          }
+        }
       }
+
+      setIsLoading(false);
     }
 
-    setStreak(getStreak());
+    loadSummary();
   }, [today]);
 
   const totalScore = useMemo(() => {
@@ -48,6 +114,7 @@ export default function Summary() {
 
     return Math.round(sum / results.length);
   }, [results]);
+
   const getScoreSquare = (score: number) => {
     if (score >= 90) return "🟩";
     if (score >= 70) return "🟨";
@@ -55,6 +122,7 @@ export default function Summary() {
 
     return "🟥";
   };
+
   const handleShare = async () => {
     const formattedShareDate = new Intl.DateTimeFormat("en-US", {
       month: "long",
@@ -71,19 +139,20 @@ export default function Summary() {
       })
       .join(" ");
 
-    const streakText =
-      streak.currentStreak === 1
-        ? "🔥 1 day streak"
-        : `🔥 ${streak.currentStreak} day streak`;
-
     const shareText = [
-      "GuessHub Daily Challenge",
+      "Kaxiro Daily Challenge",
       formattedShareDate,
       "",
       squares,
       "",
       `Score: ${totalScore}%`,
-      streakText,
+      ...(isLoggedIn
+        ? [
+            streak.currentStreak === 1
+              ? "🔥 1 day streak"
+              : `🔥 ${streak.currentStreak} day streak`,
+          ]
+        : []),
       "",
       "Can you beat my score?",
     ].join("\n");
@@ -118,6 +187,10 @@ export default function Summary() {
     }
   };
 
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <main className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden px-6 py-16">
       <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
@@ -144,29 +217,32 @@ export default function Summary() {
             {totalScore}%
           </p>
         </div>
-        <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-3">
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-              Current Streak
-            </p>
 
-            <p className="mt-2 text-2xl font-semibold text-white">
-              🔥 {streak.currentStreak}{" "}
-              {streak.currentStreak === 1 ? "day" : "days"}
-            </p>
+        {isLoggedIn && (
+          <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-3">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                Current Streak
+              </p>
+
+              <p className="mt-2 text-2xl font-semibold text-white">
+                🔥 {streak.currentStreak}{" "}
+                {streak.currentStreak === 1 ? "day" : "days"}
+              </p>
+            </div>
+
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                Best Streak
+              </p>
+
+              <p className="mt-2 text-2xl font-semibold text-white">
+                🏆 {streak.bestStreak}{" "}
+                {streak.bestStreak === 1 ? "day" : "days"}
+              </p>
+            </div>
           </div>
-
-          <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-              Best Streak
-            </p>
-
-            <p className="mt-2 text-2xl font-semibold text-white">
-              🏆 {streak.bestStreak}{" "}
-              {streak.bestStreak === 1 ? "day" : "days"}
-            </p>
-          </div>
-        </div>
+        )}
 
         <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-5">
           {dailyChallenge.map((stage) => {
@@ -194,6 +270,25 @@ export default function Summary() {
             );
           })}
         </div>
+
+        {!isLoggedIn && (
+          <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] px-6 py-6">
+            <p className="text-lg font-semibold text-white">
+              Want to keep this score?
+            </p>
+
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Create a free account to save your results, build your
+              streak and compete on the leaderboard.
+            </p>
+
+            <div className="mt-5">
+              <Button href="/register">
+                Create free account →
+              </Button>
+            </div>
+          </div>
+        )}
 
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <button

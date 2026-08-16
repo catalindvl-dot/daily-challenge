@@ -1,4 +1,10 @@
-import type { ChallengeStage } from "@/types/challenge";
+import type {
+  ChallengeStage,
+} from "@/types/challenge";
+import { gameRegistry } from "@/data/gameRegistry";
+import { hasChallengeContent } from "@/data/contentRegistry";
+import type { DailyChallengeConfig } from "@/types/dailyChallenge";
+import { challengeSchedule } from "@/data/challenges";
 
 export type DailyChallenge = {
   id: string;
@@ -6,101 +12,45 @@ export type DailyChallenge = {
   stages: ChallengeStage[];
 };
 
-const august12Stages: ChallengeStage[] = [
-  {
-    id: 1,
-    type: "flight-path",
-    title: "Flight Path",
-    description: "Find your way from one place to another.",
-    contentId: "bucharest-tokyo",
-  },
-  {
-    id: 2,
-    type: "price-guess",
-    title: "Price Guess",
-    description: "How close can you get to the real price?",
-    contentId: "premium-headphones",
-  },
-  {
-    id: 3,
-    type: "timeline",
-    title: "Timeline",
-    description: "Put the events in the correct order.",
-    contentId: "tech-history",
-  },
-  {
-    id: 4,
-    type: "visual-reveal",
-    title: "Visual Reveal",
-    description: "Can you recognize it before the full reveal?",
-    contentId: "eiffel-tower",
-  },
-  {
-    id: 5,
-    type: "connection",
-    title: "Connection",
-    description: "Find what connects the clues.",
-    contentId: "planets",
-  },
-];
+const dailyChallengeSchedule: DailyChallengeConfig[] =
+  challengeSchedule;
 
-const august13Stages: ChallengeStage[] = [
-  {
-    id: 1,
-    type: "timeline",
-    title: "Timeline",
-    description: "Put the events in the correct order.",
-    contentId: "space-history",
-  },
-  {
-    id: 2,
-    type: "flight-path",
-    title: "Flight Path",
-    description: "Find your way from one place to another.",
-    contentId: "paris-new-york",
-  },
-  {
-    id: 3,
-    type: "connection",
-    title: "Connection",
-    description: "Find what connects the clues.",
-    contentId: "social-media",
-  },
-  {
-    id: 4,
-    type: "price-guess",
-    title: "Price Guess",
-    description: "How close can you get to the real price?",
-    contentId: "gaming-console",
-  },
-  {
-    id: 5,
-    type: "visual-reveal",
-    title: "Visual Reveal",
-    description: "Can you recognize it before the full reveal?",
-    contentId: "statue-of-liberty",
-  },
-];
+function buildDailyChallenge(
+  config: DailyChallengeConfig,
+): DailyChallenge {
+  const stages: ChallengeStage[] = config.stages.map(
+    (stage, index) => {
+      if (!hasChallengeContent(stage.type, stage.contentId)) {
+        throw new Error(
+          `Invalid contentId "${stage.contentId}" for game "${stage.type}" on ${config.date}.`,
+        );
+      }
 
-export const dailyChallenges: DailyChallenge[] = [
-  {
-    id: "2026-08-12",
-    date: "2026-08-12",
-    stages: august12Stages,
-  },
-  {
-    id: "2026-08-13",
-    date: "2026-08-13",
-    stages: august13Stages,
-  },
-  {
-    id: "2026-08-16",
-    date: "2026-08-16",
-    stages: august12Stages,
-  },
-];
+      const game = gameRegistry[stage.type];
 
-export function getDailyChallenge(date: string) {
+      return {
+        id: index + 1,
+        type: stage.type,
+        title: game.title,
+        description: game.description,
+        contentId: stage.contentId,
+      };
+    },
+  );
+
+  return {
+    id: config.date,
+    date: config.date,
+    stages,
+  };
+}
+
+export const dailyChallenges: DailyChallenge[] =
+  dailyChallengeSchedule.map(buildDailyChallenge);
+
+export function getDailyChallenge(
+  date: string,
+): DailyChallenge | undefined {
   return dailyChallenges.find(
     (challenge) => challenge.date === date,
   );

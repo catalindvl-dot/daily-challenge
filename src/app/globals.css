@@ -23,11 +23,9 @@ body {
   min-height: 100vh;
   margin: 0;
   background:
-    radial-gradient(
-      circle at 50% 10%,
+    radial-gradient(circle at 50% 10%,
       rgba(34, 211, 238, 0.08),
-      transparent 32rem
-    ),
+      transparent 32rem),
     var(--background);
   color: var(--text-primary);
 }
@@ -46,4 +44,9 @@ input {
 ::selection {
   background: rgba(34, 211, 238, 0.25);
   color: var(--text-primary);
+}
+
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
 }

@@ -5,13 +5,16 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import { APP_CONFIG } from "@/lib/config";
+import { createClient } from "@/utils/supabase/client";
+import { getGuestStorageId } from "@/utils/guest";
+import { getKaxiroDate } from "@/utils/date";
 
 export default function ChallengeIntro() {
   const [isVisible, setIsVisible] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasProgress, setHasProgress] = useState(false);
 
-  const today = new Intl.DateTimeFormat("en-CA").format(new Date());
+  const today = getKaxiroDate();
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -20,21 +23,51 @@ export default function ChallengeIntro() {
   }).format(new Date());
 
   useEffect(() => {
-    const completed =
-      localStorage.getItem(`dailyChallengeCompleted:${today}`) === "true";
+    const supabase = createClient();
 
-    const savedStage = localStorage.getItem(
-      `dailyChallengeStage:${today}`,
-    );
+    async function checkChallengeStatus() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    setIsCompleted(completed);
-    setHasProgress(!completed && savedStage !== null);
+      if (user) {
+        const { data: completedResult } = await supabase
+          .from("challenge_results")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("challenge_date", today)
+          .maybeSingle();
 
-    const frame = requestAnimationFrame(() => {
-      setIsVisible(true);
-    });
+        const completed = Boolean(completedResult);
 
-    return () => cancelAnimationFrame(frame);
+        const savedStage = localStorage.getItem(
+          `dailyChallengeStage:${user.id}:${today}`,
+        );
+
+        setIsCompleted(completed);
+        setHasProgress(!completed && savedStage !== null);
+      } else {
+        const guestStorageId = getGuestStorageId();
+
+        const completed =
+          localStorage.getItem(
+            `dailyChallengeCompleted:${guestStorageId}:${today}`,
+          ) === "true";
+
+        const savedStage = localStorage.getItem(
+          `dailyChallengeStage:${guestStorageId}:${today}`,
+        );
+
+        setIsCompleted(completed);
+        setHasProgress(!completed && savedStage !== null);
+      }
+
+      requestAnimationFrame(() => {
+        setIsVisible(true);
+      });
+    }
+
+    checkChallengeStatus();
   }, [today]);
 
   return (
@@ -80,7 +113,7 @@ export default function ChallengeIntro() {
 
           <p className="mt-4 text-slate-400">
             {isCompleted
-              ? "Your score is saved. Come back tomorrow for a new challenge."
+              ? "Come back tomorrow for a new challenge."
               : hasProgress
                 ? "Pick up where you left off and complete today's challenge."
                 : "Complete all five stages to finish today's challenge."}

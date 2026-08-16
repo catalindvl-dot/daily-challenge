@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getConnectionChallenge } from "@/data/connection";
 import { fuzzyMatch } from "@/utils/fuzzyMatch";
+import GameLabel from "@/components/play/GameLabel";
 
 type ConnectionProps = {
   contentId: string;
@@ -19,7 +20,8 @@ export default function Connection({
 
   const [visibleClues, setVisibleClues] = useState(1);
   const [guess, setGuess] = useState("");
-  const [wrongGuesses, setWrongGuesses] = useState(0);
+  const [hasGuessedThisClue, setHasGuessedThisClue] =
+    useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [finalScore, setFinalScore] = useState<number | null>(null);
@@ -32,17 +34,19 @@ export default function Connection({
     );
   }
 
-  const calculateScore = (extraPenalty = 0) => {
-    const penalties =
-      visibleClues - 1 + wrongGuesses + extraPenalty;
-
-    return scoreLevels[
-      Math.min(penalties, scoreLevels.length - 1)
+  const currentScore =
+    scoreLevels[
+    Math.min(visibleClues - 1, scoreLevels.length - 1)
     ];
-  };
 
   const handleSubmit = () => {
-    if (!guess.trim() || isComplete) return;
+    if (
+      !guess.trim() ||
+      isComplete ||
+      hasGuessedThisClue
+    ) {
+      return;
+    }
 
     const correct = fuzzyMatch(
       guess,
@@ -50,19 +54,16 @@ export default function Connection({
     );
 
     if (correct) {
-      const score = calculateScore();
-
-      setFinalScore(score);
+      setFinalScore(currentScore);
       setIsCorrect(true);
       setIsComplete(true);
-      onComplete(score);
+      onComplete(currentScore);
 
       return;
     }
 
-    setWrongGuesses((current) => current + 1);
     setIsCorrect(false);
-    setGuess("");
+    setHasGuessedThisClue(true);
   };
 
   const handleRevealClue = () => {
@@ -71,26 +72,30 @@ export default function Connection({
       setIsComplete(true);
       setIsCorrect(false);
       onComplete(0);
+
       return;
     }
 
     setVisibleClues((current) => current + 1);
     setGuess("");
     setIsCorrect(null);
+    setHasGuessedThisClue(false);
   };
 
   return (
     <div className="text-center">
-      <p className="text-sm font-medium uppercase tracking-[0.24em] text-slate-500">
-        Connection
-      </p>
+      <GameLabel icon="🔗" label="Connection" />
 
       <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
-        What connects these clues?
+        What do these have in common?
       </h1>
 
       <p className="mt-4 text-slate-400">
-        Solve it using as few clues and guesses as possible.
+        Find the connection using as little information as possible.
+      </p>
+
+      <p className="mt-2 text-sm text-slate-500">
+        One guess per clue. Each new clue lowers the score.
       </p>
 
       <div className="mx-auto mt-8 grid max-w-xl gap-3">
@@ -112,12 +117,26 @@ export default function Connection({
           ))}
       </div>
 
+      <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+        <span className="text-slate-500">
+          Clue {visibleClues} of{" "}
+          {connectionChallenge.clues.length}
+        </span>
+
+        <span className="text-slate-700">•</span>
+
+        <span className="font-medium text-cyan-300">
+          {currentScore} pts
+        </span>
+      </div>
+
       {!isComplete ? (
         <>
           <div className="mx-auto mt-6 max-w-md">
             <input
               type="text"
               value={guess}
+              disabled={hasGuessedThisClue}
               onChange={(event) => setGuess(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -125,14 +144,13 @@ export default function Connection({
                 }
               }}
               placeholder="Type your answer..."
-              className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-300/40"
+              className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
           {isCorrect === false && (
             <p className="mt-4 text-sm text-slate-400">
-              Not quite. Your next correct answer is worth{" "}
-              {calculateScore()}%.
+              Not quite. Reveal another clue to try again.
             </p>
           )}
 
@@ -140,7 +158,9 @@ export default function Connection({
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!guess.trim()}
+              disabled={
+                !guess.trim() || hasGuessedThisClue
+              }
               className="rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
             >
               Submit Guess →
@@ -162,7 +182,8 @@ export default function Connection({
           {isCorrect ? (
             <>
               <p className="text-lg font-semibold text-cyan-300">
-                Correct! The connection is {connectionChallenge.answer}.
+                Correct! The connection is{" "}
+                {connectionChallenge.answer}.
               </p>
 
               <p className="mt-2 text-sm text-slate-500">
@@ -172,7 +193,8 @@ export default function Connection({
           ) : (
             <>
               <p className="text-lg font-semibold text-slate-300">
-                The connection was {connectionChallenge.answer}.
+                The connection was{" "}
+                {connectionChallenge.answer}.
               </p>
 
               <p className="mt-2 text-sm text-slate-500">

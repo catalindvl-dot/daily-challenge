@@ -9,14 +9,16 @@ import PriceGuess from "@/components/play/PriceGuess";
 import Timeline from "@/components/play/Timeline";
 import VisualReveal from "@/components/play/VisualReveal";
 import Connection from "@/components/play/Connection";
-import { updateStreak } from "@/utils/streak";
 import { saveChallengeHistoryEntry } from "@/utils/history";
+import { createClient } from "@/utils/supabase/client";
 import { saveChallengeResult } from "@/utils/supabase/saveChallengeResult";
+import { getGuestStorageId } from "@/utils/guest";
+import { getKaxiroDate } from "@/utils/date";
 
 export default function Play() {
   const router = useRouter();
 
-  const today = new Intl.DateTimeFormat("en-CA").format(new Date());
+  const today = getKaxiroDate();
   const challenge = getDailyChallenge(today);
 
   const dailyChallenge = challenge?.stages ?? [];
@@ -26,45 +28,80 @@ export default function Play() {
   const [stageCompleted, setStageCompleted] = useState(false);
   const [results, setResults] = useState<StageResult[]>([]);
   const [isCheckingProgress, setIsCheckingProgress] = useState(true);
+  const [storageId, setStorageId] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const isCompleted =
-      localStorage.getItem(`dailyChallengeCompleted:${today}`) === "true";
+    const supabase = createClient();
 
-    if (isCompleted) {
-      router.replace("/summary");
-      return;
-    }
+    async function loadProgress() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    const storedResults = localStorage.getItem(
-      `dailyChallengeResults:${today}`,
-    );
+      const currentStorageId = user
+        ? user.id
+        : getGuestStorageId();
 
-    if (storedResults) {
-      try {
-        setResults(JSON.parse(storedResults));
-      } catch {
-        setResults([]);
+      setStorageId(currentStorageId);
+      setIsLoggedIn(Boolean(user));
+
+      if (user) {
+        const { data: completedResult } = await supabase
+          .from("challenge_results")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("challenge_date", today)
+          .maybeSingle();
+
+        if (completedResult) {
+          router.replace("/summary");
+          return;
+        }
+      } else {
+        const isGuestCompleted =
+          localStorage.getItem(
+            `dailyChallengeCompleted:${currentStorageId}:${today}`,
+          ) === "true";
+
+        if (isGuestCompleted) {
+          router.replace("/summary");
+          return;
+        }
       }
-    }
 
-    const storedStage = localStorage.getItem(
-      `dailyChallengeStage:${today}`,
-    );
+      const storedResults = localStorage.getItem(
+        `dailyChallengeResults:${currentStorageId}:${today}`,
+      );
 
-    if (storedStage) {
-      const parsedStage = Number(storedStage);
-
-      if (
-        Number.isInteger(parsedStage) &&
-        parsedStage >= 1 &&
-        parsedStage <= totalStages
-      ) {
-        setCurrentStage(parsedStage);
+      if (storedResults) {
+        try {
+          setResults(JSON.parse(storedResults));
+        } catch {
+          setResults([]);
+        }
       }
+
+      const storedStage = localStorage.getItem(
+        `dailyChallengeStage:${currentStorageId}:${today}`,
+      );
+
+      if (storedStage) {
+        const parsedStage = Number(storedStage);
+
+        if (
+          Number.isInteger(parsedStage) &&
+          parsedStage >= 1 &&
+          parsedStage <= totalStages
+        ) {
+          setCurrentStage(parsedStage);
+        }
+      }
+
+      setIsCheckingProgress(false);
     }
 
-    setIsCheckingProgress(false);
+    loadProgress();
   }, [router, today, totalStages]);
 
   if (isCheckingProgress) {
@@ -96,10 +133,12 @@ export default function Play() {
         },
       ];
 
-      localStorage.setItem(
-        `dailyChallengeResults:${today}`,
-        JSON.stringify(updatedResults),
-      );
+      if (storageId) {
+        localStorage.setItem(
+          `dailyChallengeResults:${storageId}:${today}`,
+          JSON.stringify(updatedResults),
+        );
+      }
 
       return updatedResults;
     });
@@ -108,23 +147,31 @@ export default function Play() {
   };
 
   const handleContinue = async () => {
-    if (!stageCompleted) return;
+    if (!stageCompleted || !storageId) return;
 
     if (currentStage === totalStages) {
       saveChallengeHistoryEntry(today, results);
-      try {
-        await saveChallengeResult(today, results);
-      } catch (error) {
-        console.error("Failed to save challenge result to Supabase:", error);
+
+      if (isLoggedIn) {
+        try {
+          await saveChallengeResult(today, results);
+        } catch (error) {
+          console.error(
+            "Failed to save challenge result to Supabase:",
+            error,
+          );
+
+          return;
+        }
       }
 
       localStorage.setItem(
-        `dailyChallengeCompleted:${today}`,
+        `dailyChallengeCompleted:${storageId}:${today}`,
         "true",
       );
 
       localStorage.removeItem(
-        `dailyChallengeStage:${today}`,
+        `dailyChallengeStage:${storageId}:${today}`,
       );
 
       router.push("/summary");
@@ -134,7 +181,7 @@ export default function Play() {
     const nextStage = currentStage + 1;
 
     localStorage.setItem(
-      `dailyChallengeStage:${today}`,
+      `dailyChallengeStage:${storageId}:${today}`,
       String(nextStage),
     );
 

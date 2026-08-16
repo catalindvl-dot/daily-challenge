@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { getVisualRevealChallenge } from "@/data/visualReveal";
 import { fuzzyMatch } from "@/utils/fuzzyMatch";
+import GameLabel from "@/components/play/GameLabel";
 
 type VisualRevealProps = {
   contentId: string;
@@ -22,11 +23,13 @@ export default function VisualReveal({
   const [guess, setGuess] = useState("");
   const [isComplete, setIsComplete] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [hasGuessedThisReveal, setHasGuessedThisReveal] =
+    useState(false);
 
   const blurClasses = [
-    "blur-2xl scale-110",
-    "blur-xl scale-105",
-    "blur-md scale-100",
+    "blur-lg scale-105",
+    "blur-md scale-105",
+    "blur-sm scale-100",
     "blur-none scale-100",
   ];
 
@@ -39,7 +42,13 @@ export default function VisualReveal({
   }
 
   const handleSubmit = () => {
-    if (!guess.trim() || isComplete) return;
+    if (
+      !guess.trim() ||
+      isComplete ||
+      hasGuessedThisReveal
+    ) {
+      return;
+    }
 
     const correct = fuzzyMatch(
       guess,
@@ -57,6 +66,7 @@ export default function VisualReveal({
     }
 
     setIsCorrect(false);
+    setHasGuessedThisReveal(true);
   };
 
   const handleRevealMore = () => {
@@ -71,13 +81,12 @@ export default function VisualReveal({
     setRevealLevel((level) => level + 1);
     setGuess("");
     setIsCorrect(null);
+    setHasGuessedThisReveal(false);
   };
 
   return (
     <div className="text-center">
-      <p className="text-sm font-medium uppercase tracking-[0.24em] text-slate-500">
-        Visual Reveal
-      </p>
+      <GameLabel icon="👁" label="Visual Reveal" />
 
       <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
         What are you looking at?
@@ -87,20 +96,35 @@ export default function VisualReveal({
         Identify it as early as possible.
       </p>
 
+      <p className="mt-2 text-sm text-slate-500">
+        One guess per reveal. Each reveal lowers the score.
+      </p>
+
       <div className="mx-auto mt-8 max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-black/20">
         <div className="aspect-[16/10] overflow-hidden">
           <img
             src={visualRevealChallenge.image}
             alt=""
-            className={`h-full w-full object-cover transition-all duration-500 ${isComplete ? "blur-none scale-100" : blurClasses[revealLevel]
-              }`}
+            className={`h-full w-full object-cover transition-all duration-500 ${
+              isComplete
+                ? "blur-none scale-100"
+                : blurClasses[revealLevel]
+            }`}
           />
         </div>
       </div>
 
-      <p className="mt-4 text-sm text-slate-500">
-        Reveal {revealLevel + 1} of 4
-      </p>
+      <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+        <span className="text-slate-500">
+          Reveal {revealLevel + 1} of 4
+        </span>
+
+        <span className="text-slate-700">•</span>
+
+        <span className="font-medium text-cyan-300">
+          {revealScores[revealLevel]} pts
+        </span>
+      </div>
 
       {!isComplete ? (
         <>
@@ -108,6 +132,7 @@ export default function VisualReveal({
             <input
               type="text"
               value={guess}
+              disabled={hasGuessedThisReveal}
               onChange={(event) => setGuess(event.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -115,13 +140,13 @@ export default function VisualReveal({
                 }
               }}
               placeholder="Type your answer..."
-              className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-300/40"
+              className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-300/40 disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
 
           {isCorrect === false && (
             <p className="mt-4 text-sm text-slate-400">
-              Not quite. Try again or reveal more.
+              Not quite. Reveal more to try again.
             </p>
           )}
 
@@ -129,7 +154,9 @@ export default function VisualReveal({
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!guess.trim()}
+              disabled={
+                !guess.trim() || hasGuessedThisReveal
+              }
               className="rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
             >
               Submit Guess →
@@ -149,7 +176,8 @@ export default function VisualReveal({
           {isCorrect ? (
             <>
               <p className="text-lg font-semibold text-cyan-300">
-                Correct! It&apos;s the {visualRevealChallenge.answer}.
+                Correct! It&apos;s the{" "}
+                {visualRevealChallenge.answer}.
               </p>
 
               <p className="mt-2 text-sm text-slate-500">
@@ -159,7 +187,8 @@ export default function VisualReveal({
           ) : (
             <>
               <p className="text-lg font-semibold text-slate-300">
-                The answer was {visualRevealChallenge.answer}.
+                The answer was{" "}
+                {visualRevealChallenge.answer}.
               </p>
 
               <p className="mt-2 text-sm text-slate-500">

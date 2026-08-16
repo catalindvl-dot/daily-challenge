@@ -1,10 +1,20 @@
 import LandingHero from "./LandingHero";
 
-export default function Landing() {
+type LandingProps = {
+  isLoggedIn: boolean;
+  hasCompletedToday: boolean;
+};
+
+export default function Landing({
+  isLoggedIn,
+  hasCompletedToday,
+}: LandingProps) {
   return (
     <main>
-      <LandingHero />
-      
+      <LandingHero
+        isLoggedIn={isLoggedIn}
+        hasCompletedToday={hasCompletedToday}
+      />
     </main>
   );
 }

@@ -2,25 +2,21 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { importGuestChallenge } from "@/utils/supabase/importGuestChallenge";
-import { getKaxiroDate } from "@/utils/date";
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const supabase = createClient();
-    const router = useRouter();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState("");
 
-    async function handleLogin(event: FormEvent<HTMLFormElement>) {
+    async function handleSignUp(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         setMessage("");
 
-        const { error } = await supabase.auth.signInWithPassword({
+        const { error } = await supabase.auth.signUp({
             email,
             password,
         });
@@ -30,41 +26,7 @@ export default function LoginPage() {
             return;
         }
 
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-            setMessage("Could not load your account.");
-            return;
-        }
-
-        const { data: profile, error: profileError } = await supabase
-            .from("profiles")
-            .select("username")
-            .eq("id", user.id)
-            .single();
-
-        if (profileError) {
-            setMessage(profileError.message);
-            return;
-        }
-
-        if (!profile.username) {
-            router.push("/setup-profile");
-        } else {
-            const today = getKaxiroDate();
-
-            try {
-                await importGuestChallenge(today);
-            } catch (error) {
-                console.error("Failed to import guest challenge:", error);
-            }
-
-            router.push("/profile");
-        }
-
-        router.refresh();
+        setMessage("Check your email to confirm your account.");
     }
 
     return (
@@ -76,15 +38,15 @@ export default function LoginPage() {
                     </p>
 
                     <h1 className="mt-4 text-3xl font-semibold text-white">
-                        Welcome back.
+                        Create your account.
                     </h1>
 
                     <p className="mt-3 text-sm text-slate-400">
-                        Sign in to continue.
+                        Join Kaxiro and start your daily challenge.
                     </p>
                 </div>
 
-                <form onSubmit={handleLogin} className="mt-8 space-y-4">
+                <form onSubmit={handleSignUp} className="mt-8 space-y-4">
                     <input
                         type="email"
                         placeholder="Email"
@@ -100,7 +62,7 @@ export default function LoginPage() {
                             placeholder="Password"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
-                            autoComplete="current-password"
+                            autoComplete="new-password"
                             className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 pr-12 text-white outline-none placeholder:text-slate-500 focus:border-cyan-400/50 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden" />
 
                         <button
@@ -147,7 +109,7 @@ export default function LoginPage() {
                         type="submit"
                         className="w-full rounded-xl bg-cyan-400 px-4 py-3 font-semibold text-slate-950 transition hover:bg-cyan-300"
                     >
-                        Sign In
+                        Create Account
                     </button>
 
                     {message && (
@@ -158,12 +120,12 @@ export default function LoginPage() {
                 </form>
 
                 <p className="mt-6 text-center text-sm text-slate-500">
-                    Don&apos;t have an account?{" "}
+                    Already have an account?{" "}
                     <Link
-                        href="/register"
+                        href="/login"
                         className="font-medium text-cyan-300 transition hover:text-cyan-200"
                     >
-                        Create one
+                        Sign in
                     </Link>
                 </p>
             </div>

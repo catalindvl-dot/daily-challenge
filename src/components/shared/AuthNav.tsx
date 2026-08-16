@@ -19,32 +19,46 @@ export default function AuthNav({ isLoggedIn }: AuthNavProps) {
     router.refresh();
   }
 
-  if (!isLoggedIn) {
-    return (
-      <Link
-        href="/login"
-        className="text-sm font-medium text-slate-400 transition hover:text-white"
-      >
-        Sign In
-      </Link>
-    );
-  }
-
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex items-center gap-6">
       <Link
-        href="/profile"
+        href="/challenge"
         className="text-sm font-medium text-slate-400 transition hover:text-white"
       >
-        Profile
+        Challenge
       </Link>
 
-      <button
-        onClick={handleSignOut}
+      <Link
+        href="/leaderboard"
         className="text-sm font-medium text-slate-400 transition hover:text-white"
       >
-        Sign Out
-      </button>
+        Leaderboard
+      </Link>
+
+      {isLoggedIn ? (
+        <>
+          <Link
+            href="/profile"
+            className="text-sm font-medium text-slate-400 transition hover:text-white"
+          >
+            Profile
+          </Link>
+
+          <button
+            onClick={handleSignOut}
+            className="text-sm font-medium text-slate-400 transition hover:text-white"
+          >
+            Sign Out
+          </button>
+        </>
+      ) : (
+        <Link
+          href="/login"
+          className="text-sm font-medium text-slate-400 transition hover:text-white"
+        >
+          Sign In
+        </Link>
+      )}
     </div>
   );
 }
