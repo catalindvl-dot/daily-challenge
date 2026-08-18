@@ -16,6 +16,7 @@ export default function FlightPath({
   const flightPathChallenge = getFlightPathChallenge(contentId);
 
   const [guess, setGuess] = useState(10000);
+  const [guessInput, setGuessInput] = useState("10000");
   const [isLocked, setIsLocked] = useState(false);
 
   if (!flightPathChallenge) {
@@ -35,11 +36,45 @@ export default function FlightPath({
     errorPercent <= 3
       ? 100
       : Math.max(
-          0,
+        0,
+        Math.min(
+          99,
           Math.round(
             100 * (1 - (errorPercent - 3) / 97),
           ),
-        );
+        ),
+      );
+
+  const handleSliderChange = (value: number) => {
+    const clampedValue = Math.min(
+      20000,
+      Math.max(0, value),
+    );
+
+    setGuess(clampedValue);
+    setGuessInput(String(clampedValue));
+  };
+
+  const handleInputChange = (value: string) => {
+    setGuessInput(value);
+
+    if (value === "") {
+      return;
+    }
+
+    const numericValue = Number(value);
+
+    if (Number.isNaN(numericValue)) {
+      return;
+    }
+
+    const clampedValue = Math.min(
+      20000,
+      Math.max(0, numericValue),
+    );
+
+    setGuess(clampedValue);
+  };
 
   return (
     <div className="text-center">
@@ -57,9 +92,25 @@ export default function FlightPath({
         Get within 3% for a perfect score.
       </p>
 
-      <p className="mt-8 text-2xl font-semibold text-cyan-300">
-        {guess.toLocaleString()} km
-      </p>
+      <div className="mt-8 flex items-center justify-center gap-2">
+        <input
+          type="number"
+          min="0"
+          max="20000"
+          step="1"
+          value={guessInput}
+          disabled={isLocked}
+          onChange={(event) =>
+            handleInputChange(event.target.value)
+          }
+          className="w-40 appearance-none rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center text-2xl font-semibold text-cyan-300 outline-none transition focus:border-cyan-300/50 disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          aria-label="Distance guess in kilometers"
+        />
+
+        <span className="text-2xl font-semibold text-cyan-300">
+          km
+        </span>
+      </div>
 
       <input
         type="range"
@@ -68,7 +119,9 @@ export default function FlightPath({
         step="1"
         value={guess}
         disabled={isLocked}
-        onChange={(event) => setGuess(Number(event.target.value))}
+        onChange={(event) =>
+          handleSliderChange(Number(event.target.value))
+        }
         className="mt-6 w-full disabled:cursor-not-allowed disabled:opacity-50"
       />
 

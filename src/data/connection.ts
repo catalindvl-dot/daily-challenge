@@ -16,16 +16,22 @@ export const connectionChallenges: Record<
   },
 
   "social-media": {
-    clues: ["Instagram", "Facebook", "WhatsApp", "Messenger"],
-    answer: "Meta",
-    acceptedAnswers: [
-      "Meta",
-      "Meta Platforms",
-      "Meta apps",
-      "Apps owned by Meta",
-      "Meta social media apps",
-    ],
-  },
+  clues: ["Instagram", "Facebook", "WhatsApp", "Messenger"],
+  answer: "Meta",
+  acceptedAnswers: [
+    "Meta",
+    "Meta Platforms",
+    "Meta apps",
+    "Meta applications",
+    "Apps owned by Meta",
+    "Applications owned by Meta",
+    "Owned by Meta",
+    "All owned by Meta",
+    "Platforms owned by Meta",
+    "Meta platforms",
+    "Meta social media apps",
+  ],
+},
 
   "sportswear-brands": {
     clues: ["Nike", "Adidas", "Puma", "Reebok"],

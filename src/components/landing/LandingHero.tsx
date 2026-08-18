@@ -35,13 +35,15 @@ export default function LandingHero({
     useState<ChallengeStatus>(
       hasCompletedToday ? "completed" : "loading",
     );
+
   const today = getKaxiroDate();
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
-  }).format(new Date());
+    timeZone: "UTC",
+  }).format(new Date(`${today}T12:00:00Z`));
 
   useEffect(() => {
     const supabase = createClient();
@@ -51,6 +53,7 @@ export default function LandingHero({
         setChallengeStatus("completed");
         return;
       }
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -135,10 +138,11 @@ export default function LandingHero({
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:28px_28px]" />
 
       <div
-        className={`pointer-events-none absolute left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl transition-all duration-300 ${transitionState === "transitioning"
-          ? "top-32 scale-125 opacity-70"
-          : "top-20 scale-100 opacity-100"
-          }`}
+        className={`pointer-events-none absolute left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl transition-all duration-300 ${
+          transitionState === "transitioning"
+            ? "top-32 scale-125 opacity-70"
+            : "top-20 scale-100 opacity-100"
+        }`}
       />
 
       <Container className="relative max-w-3xl text-center">
@@ -158,10 +162,11 @@ export default function LandingHero({
         </div>
 
         <div
-          className={`transition-all duration-300 ${transitionState === "transitioning"
-            ? "-translate-y-2 opacity-0"
-            : "translate-y-0 opacity-100"
-            }`}
+          className={`transition-all duration-300 ${
+            transitionState === "transitioning"
+              ? "-translate-y-2 opacity-0"
+              : "translate-y-0 opacity-100"
+          }`}
         >
           <h1 className="text-balance text-5xl font-semibold tracking-[-0.04em] text-white sm:text-7xl">
             Five minutes.
@@ -178,10 +183,11 @@ export default function LandingHero({
 
         <div className="mt-10">
           <div
-            className={`transition-all duration-300 ${transitionState === "transitioning"
-              ? "pointer-events-none translate-y-1 opacity-0"
-              : "translate-y-0 opacity-100"
-              }`}
+            className={`transition-all duration-300 ${
+              transitionState === "transitioning"
+                ? "pointer-events-none translate-y-1 opacity-0"
+                : "translate-y-0 opacity-100"
+            }`}
           >
             {challengeStatus === "loading" ? (
               <div className="h-12" />

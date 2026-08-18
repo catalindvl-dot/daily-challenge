@@ -20,8 +20,20 @@ export default function Timeline({
     () => [...(timelineChallenge?.events ?? [])].reverse(),
   );
 
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [userOrder, setUserOrder] = useState<TimelineEvent[] | null>(
+    null,
+  );
+
+  const [correctOrder, setCorrectOrder] = useState<
+    TimelineEvent[] | null
+  >(null);
+
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(
+    null,
+  );
+  const [dragOverIndex, setDragOverIndex] = useState<
+    number | null
+  >(null);
   const [isLocked, setIsLocked] = useState(false);
   const [score, setScore] = useState<number | null>(null);
 
@@ -46,7 +58,10 @@ export default function Timeline({
 
     setEvents((currentEvents) => {
       const updatedEvents = [...currentEvents];
-      const [draggedEvent] = updatedEvents.splice(draggedIndex, 1);
+      const [draggedEvent] = updatedEvents.splice(
+        draggedIndex,
+        1,
+      );
 
       updatedEvents.splice(targetIndex, 0, draggedEvent);
 
@@ -58,9 +73,9 @@ export default function Timeline({
   };
 
   const lockTimeline = () => {
-    const correctOrder = [...timelineChallenge.events].sort(
-      (a, b) => a.year - b.year,
-    );
+    const sortedCorrectOrder = [
+      ...timelineChallenge.events,
+    ].sort((a, b) => a.year - b.year);
 
     let correctPairs = 0;
     let totalPairs = 0;
@@ -69,13 +84,15 @@ export default function Timeline({
       for (let j = i + 1; j < events.length; j++) {
         totalPairs++;
 
-        const firstCorrectIndex = correctOrder.findIndex(
-          (event) => event.id === events[i].id,
-        );
+        const firstCorrectIndex =
+          sortedCorrectOrder.findIndex(
+            (event) => event.id === events[i].id,
+          );
 
-        const secondCorrectIndex = correctOrder.findIndex(
-          (event) => event.id === events[j].id,
-        );
+        const secondCorrectIndex =
+          sortedCorrectOrder.findIndex(
+            (event) => event.id === events[j].id,
+          );
 
         if (firstCorrectIndex < secondCorrectIndex) {
           correctPairs++;
@@ -87,65 +104,66 @@ export default function Timeline({
       (correctPairs / totalPairs) * 100,
     );
 
+    setUserOrder([...events]);
+    setCorrectOrder(sortedCorrectOrder);
     setScore(calculatedScore);
-    setEvents(correctOrder);
     setIsLocked(true);
+
     onComplete(calculatedScore);
   };
 
-  return (
-    <div className="text-center">
-      <GameLabel icon="⏳" label="Timeline" />
-
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
-        Put these events in order
-      </h1>
-
-      <p className="mt-4 text-slate-400">
-        Oldest to newest
-      </p>
-
-      <p className="mt-2 text-sm text-slate-500">
-        Drag the events to rearrange them.
-      </p>
-
-      <div className="mx-auto mt-8 max-w-xl space-y-3">
-        {events.map((event, index) => (
+  const renderTimelineList = (
+    timelineEvents: TimelineEvent[],
+    showDragHandle: boolean,
+  ) => {
+    return (
+      <div className="space-y-3">
+        {timelineEvents.map((event, index) => (
           <div
             key={event.id}
-            draggable={!isLocked}
+            draggable={showDragHandle}
             onDragStart={() => {
-              setDraggedIndex(index);
+              if (showDragHandle) {
+                setDraggedIndex(index);
+              }
             }}
             onDragEnter={() => {
-              if (!isLocked) {
+              if (showDragHandle) {
                 setDragOverIndex(index);
               }
             }}
-            onDragOver={(event) => {
-              event.preventDefault();
+            onDragOver={(dragEvent) => {
+              if (showDragHandle) {
+                dragEvent.preventDefault();
+              }
             }}
             onDrop={() => {
-              handleDrop(index);
+              if (showDragHandle) {
+                handleDrop(index);
+              }
             }}
             onDragEnd={() => {
               setDraggedIndex(null);
               setDragOverIndex(null);
             }}
-            className={`flex items-center justify-between rounded-xl border px-4 py-4 transition ${
-              isLocked
-                ? "cursor-default border-white/10 bg-white/[0.03]"
-                : "cursor-grab active:cursor-grabbing"
+            className={`rounded-xl border px-4 py-4 transition ${
+              showDragHandle
+                ? "cursor-grab active:cursor-grabbing"
+                : "cursor-default"
             } ${
-              dragOverIndex === index && draggedIndex !== index
+              showDragHandle &&
+              dragOverIndex === index &&
+              draggedIndex !== index
                 ? "border-cyan-300/50 bg-cyan-300/10"
                 : "border-white/10 bg-white/[0.03]"
             } ${
-              draggedIndex === index ? "opacity-40" : "opacity-100"
+              showDragHandle && draggedIndex === index
+                ? "opacity-40"
+                : "opacity-100"
             }`}
           >
             <div className="flex items-center gap-4 text-left">
-              {!isLocked && (
+              {showDragHandle && (
                 <span
                   className="select-none text-xl text-slate-600"
                   aria-hidden="true"
@@ -169,25 +187,73 @@ export default function Timeline({
           </div>
         ))}
       </div>
+    );
+  };
 
-      {isLocked && score !== null && (
-        <div className="mt-8">
-          <p
-            className={`text-lg font-semibold ${
-              score === 100
-                ? "text-cyan-300"
-                : "text-slate-300"
-            }`}
-          >
-            {score === 100
-              ? "Perfect! You got the timeline right."
-              : "Not quite. Here’s the correct timeline."}
-          </p>
+  return (
+    <div className="text-center">
+      <GameLabel icon="⏳" label="Timeline" />
 
-          <p className="mt-2 text-sm text-slate-500">
-            Score: {score}%
-          </p>
+      <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+        Put these events in order
+      </h1>
+
+      <p className="mt-4 text-slate-400">
+        Oldest to newest
+      </p>
+
+      {!isLocked && (
+        <p className="mt-2 text-sm text-slate-500">
+          Drag the events to rearrange them.
+        </p>
+      )}
+
+      {!isLocked ? (
+        <div className="mx-auto mt-8 max-w-xl">
+          {renderTimelineList(events, true)}
         </div>
+      ) : (
+        <>
+          {score !== null && (
+            <div className="mt-8">
+              <p
+                className={`text-lg font-semibold ${
+                  score === 100
+                    ? "text-cyan-300"
+                    : "text-slate-300"
+                }`}
+              >
+                {score === 100
+                  ? "Perfect! You got the timeline right."
+                  : "Not quite. Compare your order with the correct timeline."}
+              </p>
+
+              <p className="mt-2 text-sm text-slate-500">
+                Score: {score}%
+              </p>
+            </div>
+          )}
+
+          {userOrder && correctOrder && (
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              <div>
+                <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
+                  Your order
+                </p>
+
+                {renderTimelineList(userOrder, false)}
+              </div>
+
+              <div>
+                <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-cyan-300">
+                  Correct order
+                </p>
+
+                {renderTimelineList(correctOrder, false)}
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {!isLocked && (

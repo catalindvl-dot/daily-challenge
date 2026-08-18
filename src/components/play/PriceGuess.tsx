@@ -15,8 +15,12 @@ export default function PriceGuess({
 }: PriceGuessProps) {
   const priceGuessChallenge = getPriceGuessChallenge(contentId);
 
-  const [guess, setGuess] = useState(
-    priceGuessChallenge?.startingGuess ?? 0,
+  const startingGuess =
+    priceGuessChallenge?.startingGuess ?? 0;
+
+  const [guess, setGuess] = useState(startingGuess);
+  const [guessInput, setGuessInput] = useState(
+    String(startingGuess),
   );
   const [isLocked, setIsLocked] = useState(false);
 
@@ -38,13 +42,24 @@ export default function PriceGuess({
       ? 100
       : Math.max(
         0,
-        Math.round(
-          100 * (1 - (errorPercent - 5) / 95),
+        Math.min(
+          99,
+          Math.round(
+            100 * (1 - (errorPercent - 5) / 95),
+          ),
         ),
       );
 
-  const changeGuess = (amount: number) => {
-    setGuess((currentGuess) => Math.max(0, currentGuess + amount));
+  const handleInputChange = (value: string) => {
+    const digitsOnly = value.replace(/\D/g, "");
+
+    setGuessInput(digitsOnly);
+
+    if (digitsOnly === "") {
+      return;
+    }
+
+    setGuess(Number(digitsOnly));
   };
 
   return (
@@ -63,71 +78,38 @@ export default function PriceGuess({
         Get within 5% for a perfect score.
       </p>
 
-      <p className="mt-8 text-4xl font-semibold text-cyan-300">
-        {priceGuessChallenge.currency}
-        {guess.toLocaleString()}
-      </p>
+      <div className="mt-8 flex justify-center">
+        <div className="flex min-w-44 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 transition focus-within:border-cyan-300/50">
+          <span className="mr-1 text-3xl font-semibold text-cyan-300">
+            {priceGuessChallenge.currency}
+          </span>
 
-      {!isLocked && (
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => changeGuess(-100)}
-            className="rounded-lg border border-white/10 px-4 py-2 text-slate-300 transition hover:bg-white/5"
-          >
-            −100
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changeGuess(-10)}
-            className="rounded-lg border border-white/10 px-4 py-2 text-slate-300 transition hover:bg-white/5"
-          >
-            −10
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changeGuess(-1)}
-            className="rounded-lg border border-white/10 px-4 py-2 text-slate-300 transition hover:bg-white/5"
-          >
-            −1
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changeGuess(1)}
-            className="rounded-lg border border-white/10 px-4 py-2 text-slate-300 transition hover:bg-white/5"
-          >
-            +1
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changeGuess(10)}
-            className="rounded-lg border border-white/10 px-4 py-2 text-slate-300 transition hover:bg-white/5"
-          >
-            +10
-          </button>
-
-          <button
-            type="button"
-            onClick={() => changeGuess(100)}
-            className="rounded-lg border border-white/10 px-4 py-2 text-slate-300 transition hover:bg-white/5"
-          >
-            +100
-          </button>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={guessInput}
+            disabled={isLocked}
+            onChange={(event) =>
+              handleInputChange(event.target.value)
+            }
+            aria-label="Price guess"
+            style={{
+              width: `${Math.max(1, guessInput.length)}ch`,
+            }}
+            className="min-w-[1ch] bg-transparent text-left text-3xl font-semibold text-cyan-300 outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          />
         </div>
-      )}
+      </div>
 
       {!isLocked ? (
         <button
           type="button"
+          disabled={guessInput === ""}
           onClick={() => {
             setIsLocked(true);
             onComplete(accuracy);
           }}
-          className="mt-8 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200"
+          className="mt-8 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
         >
           Lock Guess →
         </button>

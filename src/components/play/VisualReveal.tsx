@@ -30,7 +30,7 @@ export default function VisualReveal({
     "blur-lg scale-105",
     "blur-md scale-105",
     "blur-sm scale-100",
-    "blur-none scale-100",
+    "blur-[2px] scale-100",
   ];
 
   if (!visualRevealChallenge) {

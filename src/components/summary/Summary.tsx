@@ -127,7 +127,8 @@ export default function Summary() {
     const formattedShareDate = new Intl.DateTimeFormat("en-US", {
       month: "long",
       day: "numeric",
-    }).format(new Date());
+      timeZone: "UTC",
+    }).format(new Date(`${today}T12:00:00Z`));
 
     const squares = dailyChallenge
       .map((stage) => {
@@ -148,10 +149,10 @@ export default function Summary() {
       `Score: ${totalScore}%`,
       ...(isLoggedIn
         ? [
-            streak.currentStreak === 1
-              ? "🔥 1 day streak"
-              : `🔥 ${streak.currentStreak} day streak`,
-          ]
+          streak.currentStreak === 1
+            ? "🔥 1 day streak"
+            : `🔥 ${streak.currentStreak} day streak`,
+        ]
         : []),
       "",
       "Can you beat my score?",

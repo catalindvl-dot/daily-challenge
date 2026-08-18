@@ -1,4 +1,4 @@
-const DEV_TEST_DATE: string | null = "2026-08-12";
+const DEV_TEST_DATE: string | null = "2026-08-15";
 
 export function getKaxiroDate(): string {
   if (
