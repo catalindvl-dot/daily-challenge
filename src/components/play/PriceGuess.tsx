@@ -61,6 +61,12 @@ export default function PriceGuess({
 
     setGuess(Number(digitsOnly));
   };
+  const adjustGuess = (amount: number) => {
+    const newGuess = Math.max(0, guess + amount);
+
+    setGuess(newGuess);
+    setGuessInput(String(newGuess));
+  };
 
   return (
     <div className="text-center">
@@ -98,6 +104,28 @@ export default function PriceGuess({
             }}
             className="min-w-[1ch] bg-transparent text-left text-3xl font-semibold text-cyan-300 outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
+
+          {!isLocked && (
+            <div className="ml-3 flex flex-col">
+              <button
+                type="button"
+                onClick={() => adjustGuess(1)}
+                className="flex h-4 w-5 items-center justify-center rounded-t text-[10px] leading-none text-slate-500 transition hover:bg-white/5 hover:text-cyan-300"
+                aria-label="Increase price by 1"
+              >
+                ▲
+              </button>
+
+              <button
+                type="button"
+                onClick={() => adjustGuess(-1)}
+                className="flex h-4 w-5 items-center justify-center rounded-b text-[10px] leading-none text-slate-500 transition hover:bg-white/5 hover:text-cyan-300"
+                aria-label="Decrease price by 1"
+              >
+                ▼
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
