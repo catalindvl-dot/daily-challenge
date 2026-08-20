@@ -20,7 +20,8 @@ export default function ChallengeIntro() {
     weekday: "long",
     month: "long",
     day: "numeric",
-  }).format(new Date());
+    timeZone: "UTC",
+  }).format(new Date(`${today}T12:00:00Z`));
 
   useEffect(() => {
     const supabase = createClient();
@@ -71,39 +72,39 @@ export default function ChallengeIntro() {
   }, [today]);
 
   return (
-    <main className="relative flex min-h-screen items-center overflow-hidden px-6 py-16">
+    <main className="relative flex min-h-[calc(100dvh-4rem)] items-start justify-center overflow-hidden px-6 pb-8 pt-32 [@media(max-height:900px)]:pt-20 [@media(max-height:760px)]:pt-12">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:28px_28px]" />
 
       <div
-        className={`pointer-events-none absolute left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl transition-all duration-300 ${
-          isVisible
-            ? "top-16 scale-100 opacity-100"
-            : "top-32 scale-125 opacity-70"
-        }`}
+        className={`pointer-events-none absolute left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl transition-all duration-300 [@media(max-height:900px)]:h-72 [@media(max-height:900px)]:w-72 ${isVisible
+          ? "top-16 scale-100 opacity-100 [@media(max-height:900px)]:top-10"
+          : "top-32 scale-125 opacity-70 [@media(max-height:900px)]:top-20"
+          }`}
       />
 
       <Container
-        className={`relative max-w-3xl text-center transition-all duration-300 ${
-          isVisible
-            ? "translate-y-0 opacity-100"
-            : "translate-y-2 opacity-0"
-        }`}
+        className={`relative max-w-3xl translate-y-12 text-center transition-all duration-300 [@media(max-height:900px)]:translate-y-6 [@media(max-height:760px)]:translate-y-2 ${isVisible
+            ? "opacity-100"
+            : "opacity-0"
+          }`}
       >
-        <p className="text-sm font-medium uppercase tracking-[0.28em] text-cyan-300">
-          Today&apos;s Challenge
-        </p>
+        <div>
+          <p className="text-sm font-medium uppercase tracking-[0.28em] text-cyan-300">
+            Today&apos;s Challenge
+          </p>
 
-        <p className="mt-3 text-sm text-slate-500">
-          {formattedDate}
-        </p>
+          <p className="mt-3 text-sm text-slate-500 [@media(max-height:760px)]:mt-2">
+            {formattedDate}
+          </p>
 
-        <div className="mt-5 flex items-center justify-center gap-3">
-          <Badge>{APP_CONFIG.challenge.stages} stages</Badge>
-          <Badge>5 minutes</Badge>
+          <div className="mt-4 flex items-center justify-center gap-3 [@media(max-height:760px)]:mt-3">
+            <Badge>{APP_CONFIG.challenge.stages} stages</Badge>
+            <Badge>5 minutes</Badge>
+          </div>
         </div>
 
-        <div className="mx-auto mt-12 max-w-xl border-y border-white/10 py-10">
-          <p className="text-3xl font-semibold tracking-tight text-white">
+        <div className="mx-auto mt-10 max-w-xl border-y border-white/[0.07] py-8 [@media(max-height:900px)]:mt-7 [@media(max-height:900px)]:py-6 [@media(max-height:760px)]:mt-5 [@media(max-height:760px)]:py-5">
+          <p className="text-3xl font-semibold tracking-tight text-white [@media(max-height:760px)]:text-2xl">
             {isCompleted
               ? "Today's challenge is complete."
               : hasProgress
@@ -111,16 +112,16 @@ export default function ChallengeIntro() {
                 : "A new challenge is ready."}
           </p>
 
-          <p className="mt-4 text-slate-400">
+          <p className="mt-3 text-slate-400 [@media(max-height:760px)]:mt-2">
             {isCompleted
-              ? "Come back tomorrow for a new challenge."
+              ? "Come back tomorrow for a fresh set of challenges."
               : hasProgress
-                ? "Pick up where you left off and complete today's challenge."
-                : "Complete all five stages to finish today's challenge."}
+                ? "Pick up where you left off."
+                : "Five fresh challenges are waiting for you."}
           </p>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-8 [@media(max-height:900px)]:mt-6 [@media(max-height:760px)]:mt-4">
           {isCompleted ? (
             <Button href="/summary">
               View Results →

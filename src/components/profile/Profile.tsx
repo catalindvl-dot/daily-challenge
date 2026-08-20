@@ -71,8 +71,8 @@ export default function Profile() {
   }, []);
 
   return (
-    <main className="relative min-h-screen overflow-hidden px-6 py-16">
-      <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
+    <main className="relative min-h-[calc(100dvh-4rem)] overflow-hidden px-6 pb-12 pt-12 [@media(max-height:900px)]:pb-8 [@media(max-height:900px)]:pt-8">
+      <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl [@media(max-height:900px)]:h-80 [@media(max-height:900px)]:w-80" />
 
       <Container className="relative max-w-4xl">
         <div className="text-center">
@@ -89,7 +89,7 @@ export default function Profile() {
           </p>
         </div>
 
-        <div className="mt-12 grid gap-4 sm:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-3">
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
             <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
               Challenges Played
@@ -145,7 +145,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="mt-12">
+        <div className="mt-10">
           <div className="text-center">
             <p className="text-sm font-medium uppercase tracking-[0.24em] text-slate-500">
               Game Performance

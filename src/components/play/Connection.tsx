@@ -36,7 +36,7 @@ export default function Connection({
 
   const currentScore =
     scoreLevels[
-    Math.min(visibleClues - 1, scoreLevels.length - 1)
+      Math.min(visibleClues - 1, scoreLevels.length - 1)
     ];
 
   const handleSubmit = () => {
@@ -98,41 +98,43 @@ export default function Connection({
         One guess per clue. Each new clue lowers the score.
       </p>
 
-      <div className="mx-auto mt-8 grid max-w-xl gap-3">
+      <div className="mx-auto mt-7 grid max-w-xl gap-2.5">
         {connectionChallenge.clues
           .slice(0, visibleClues)
           .map((clue, index) => (
             <div
               key={clue}
-              className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-4"
+              className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3"
             >
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 Clue {index + 1}
               </p>
 
-              <p className="mt-2 text-lg font-medium text-white">
+              <p className="mt-1.5 text-base font-medium text-white">
                 {clue}
               </p>
             </div>
           ))}
       </div>
 
-      <div className="mt-4 flex items-center justify-center gap-3 text-sm">
-        <span className="text-slate-500">
-          Clue {visibleClues} of{" "}
-          {connectionChallenge.clues.length}
-        </span>
+      {!isComplete && (
+        <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+          <span className="text-slate-500">
+            Clue {visibleClues} of{" "}
+            {connectionChallenge.clues.length}
+          </span>
 
-        <span className="text-slate-700">•</span>
+          <span className="text-slate-700">•</span>
 
-        <span className="font-medium text-cyan-300">
-          {currentScore} pts
-        </span>
-      </div>
+          <span className="font-medium text-cyan-300">
+            {currentScore} pts
+          </span>
+        </div>
+      )}
 
       {!isComplete ? (
         <>
-          <div className="mx-auto mt-6 max-w-md">
+          <div className="mx-auto mt-5 max-w-md">
             <input
               type="text"
               value={guess}
@@ -149,12 +151,12 @@ export default function Connection({
           </div>
 
           {isCorrect === false && (
-            <p className="mt-4 text-sm text-slate-400">
+            <p className="mt-3 text-sm text-slate-400">
               Not quite. Reveal another clue to try again.
             </p>
           )}
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={handleSubmit}
@@ -178,7 +180,7 @@ export default function Connection({
           </div>
         </>
       ) : (
-        <div className="mt-8">
+        <div className="mt-6">
           {isCorrect ? (
             <>
               <p className="text-lg font-semibold text-cyan-300">

@@ -100,8 +100,8 @@ export default function VisualReveal({
         One guess per reveal. Each reveal lowers the score.
       </p>
 
-      <div className="mx-auto mt-8 max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-black/20">
-        <div className="aspect-[16/10] overflow-hidden">
+      <div className="mx-auto mt-6 max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+        <div className="aspect-[16/9] overflow-hidden">
           <img
             src={visualRevealChallenge.image}
             alt=""
@@ -114,21 +114,23 @@ export default function VisualReveal({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center justify-center gap-3 text-sm">
-        <span className="text-slate-500">
-          Reveal {revealLevel + 1} of 4
-        </span>
+      {!isComplete && (
+        <div className="mt-3 flex items-center justify-center gap-3 text-sm">
+          <span className="text-slate-500">
+            Reveal {revealLevel + 1} of 4
+          </span>
 
-        <span className="text-slate-700">•</span>
+          <span className="text-slate-700">•</span>
 
-        <span className="font-medium text-cyan-300">
-          {revealScores[revealLevel]} pts
-        </span>
-      </div>
+          <span className="font-medium text-cyan-300">
+            {revealScores[revealLevel]} pts
+          </span>
+        </div>
+      )}
 
       {!isComplete ? (
         <>
-          <div className="mx-auto mt-6 max-w-md">
+          <div className="mx-auto mt-5 max-w-md">
             <input
               type="text"
               value={guess}
@@ -145,12 +147,12 @@ export default function VisualReveal({
           </div>
 
           {isCorrect === false && (
-            <p className="mt-4 text-sm text-slate-400">
+            <p className="mt-3 text-sm text-slate-400">
               Not quite. Reveal more to try again.
             </p>
           )}
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
             <button
               type="button"
               onClick={handleSubmit}
@@ -172,7 +174,7 @@ export default function VisualReveal({
           </div>
         </>
       ) : (
-        <div className="mt-8">
+        <div className="mt-5">
           {isCorrect ? (
             <>
               <p className="text-lg font-semibold text-cyan-300">

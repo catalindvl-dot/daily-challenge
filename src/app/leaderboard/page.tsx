@@ -15,18 +15,20 @@ export default async function LeaderboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-
-
   const today = getKaxiroDate();
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     month: "long",
     day: "numeric",
-  }).format(new Date());
+    timeZone: "UTC",
+  }).format(new Date(`${today}T12:00:00Z`));
 
-  const { data, error } = await supabase.rpc("get_daily_leaderboard", {
-    target_date: today,
-  });
+  const { data, error } = await supabase.rpc(
+    "get_daily_leaderboard",
+    {
+      target_date: today,
+    },
+  );
 
   if (error) {
     console.error("Failed to load leaderboard:", error);
@@ -39,8 +41,8 @@ export default async function LeaderboardPage() {
     : undefined;
 
   return (
-    <main className="relative min-h-screen overflow-hidden px-6 py-16">
-      <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
+    <main className="relative min-h-[calc(100dvh-4rem)] overflow-hidden px-6 pb-10 pt-20 [@media(max-height:900px)]:pt-14 [@media(max-height:760px)]:pt-8">
+      <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl [@media(max-height:900px)]:h-80 [@media(max-height:900px)]:w-80" />
 
       <div className="relative mx-auto w-full max-w-3xl">
         <div className="text-center">
@@ -61,7 +63,7 @@ export default async function LeaderboardPage() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 [@media(max-height:900px)]:mt-8">
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center">
             <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
               Players Today
@@ -84,6 +86,7 @@ export default async function LeaderboardPage() {
             </p>
           </div>
         </div>
+
         {!user && (
           <div className="mt-6 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] px-6 py-5 text-center">
             <p className="font-semibold text-white">
@@ -114,8 +117,11 @@ export default async function LeaderboardPage() {
                 return (
                   <div
                     key={entry.user_id}
-                    className={`grid grid-cols-[70px_1fr_90px] items-center border-b border-white/5 px-6 py-4 last:border-b-0 ${isCurrentUser ? "bg-cyan-400/10" : ""
-                      }`}
+                    className={`grid grid-cols-[70px_1fr_90px] items-center border-b border-white/5 px-6 py-4 last:border-b-0 ${
+                      isCurrentUser
+                        ? "bg-cyan-400/10"
+                        : ""
+                    }`}
                   >
                     <div className="flex w-10 items-center justify-center">
                       <span
@@ -136,10 +142,11 @@ export default async function LeaderboardPage() {
                     </div>
 
                     <p
-                      className={`font-medium ${isCurrentUser
-                        ? "text-cyan-300"
-                        : "text-white"
-                        }`}
+                      className={`font-medium ${
+                        isCurrentUser
+                          ? "text-cyan-300"
+                          : "text-white"
+                      }`}
                     >
                       {entry.username}
                       {isCurrentUser ? " (You)" : ""}

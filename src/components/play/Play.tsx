@@ -110,7 +110,7 @@ export default function Play() {
 
   if (!challenge || totalStages === 0) {
     return (
-      <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-6">
+      <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6">
         <p className="text-slate-400">
           No challenge available for today.
         </p>
@@ -190,7 +190,7 @@ export default function Play() {
   };
 
   return (
-    <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-6 py-16">
+    <main className="flex min-h-[calc(100dvh-4rem)] items-start justify-center px-6 pb-8 pt-10 [@media(max-height:900px)]:pb-6 [@media(max-height:900px)]:pt-6 [@media(max-height:760px)]:pb-4 [@media(max-height:760px)]:pt-4">
       <div className="w-full max-w-3xl">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium uppercase tracking-[0.28em] text-cyan-300">
@@ -202,7 +202,7 @@ export default function Play() {
           </p>
         </div>
 
-        <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/10">
+        <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/10 [@media(max-height:760px)]:mt-3">
           <div
             className="h-full rounded-full bg-cyan-300 transition-all duration-300"
             style={{
@@ -211,7 +211,7 @@ export default function Play() {
           />
         </div>
 
-        <div className="mt-12 rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center">
+        <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center [@media(max-height:900px)]:mt-7 [@media(max-height:900px)]:p-6 [@media(max-height:760px)]:mt-5 [@media(max-height:760px)]:p-5">
           {stage.type === "flight-path" ? (
             <FlightPath
               contentId={stage.contentId}
@@ -252,19 +252,20 @@ export default function Play() {
               </p>
             </>
           )}
-        </div>
 
-        <div className="mt-8 flex justify-center">
-          <button
-            type="button"
-            disabled={!stageCompleted}
-            onClick={handleContinue}
-            className="rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
-          >
-            {currentStage === totalStages
-              ? "Finish Challenge →"
-              : "Continue →"}
-          </button>
+          {stageCompleted && (
+            <div className="mt-6 flex justify-center [@media(max-height:760px)]:mt-4">
+              <button
+                type="button"
+                onClick={handleContinue}
+                className="rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200"
+              >
+                {currentStage === totalStages
+                  ? "Finish Challenge →"
+                  : "Continue →"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </main>

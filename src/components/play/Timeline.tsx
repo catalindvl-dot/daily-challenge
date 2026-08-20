@@ -117,7 +117,7 @@ export default function Timeline({
     showDragHandle: boolean,
   ) => {
     return (
-      <div className="space-y-3">
+      <div className={showDragHandle ? "space-y-3" : "space-y-2"}>
         {timelineEvents.map((event, index) => (
           <div
             key={event.id}
@@ -146,7 +146,9 @@ export default function Timeline({
               setDraggedIndex(null);
               setDragOverIndex(null);
             }}
-            className={`rounded-xl border px-4 py-4 transition ${
+            className={`rounded-xl border px-4 transition ${
+              showDragHandle ? "py-4" : "py-3"
+            } ${
               showDragHandle
                 ? "cursor-grab active:cursor-grabbing"
                 : "cursor-default"
@@ -215,7 +217,7 @@ export default function Timeline({
       ) : (
         <>
           {score !== null && (
-            <div className="mt-8">
+            <div className="mt-5">
               <p
                 className={`text-lg font-semibold ${
                   score === 100
@@ -228,16 +230,16 @@ export default function Timeline({
                   : "Not quite. Compare your order with the correct timeline."}
               </p>
 
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-slate-500">
                 Score: {score}%
               </p>
             </div>
           )}
 
           {userOrder && correctOrder && (
-            <div className="mt-8 grid gap-6 md:grid-cols-2">
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
               <div>
-                <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
+                <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
                   Your order
                 </p>
 
@@ -245,7 +247,7 @@ export default function Timeline({
               </div>
 
               <div>
-                <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-cyan-300">
+                <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-cyan-300">
                   Correct order
                 </p>
 

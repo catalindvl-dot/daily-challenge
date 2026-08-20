@@ -77,9 +77,7 @@ export default function Summary() {
 
         const history = await getChallengeHistoryFromSupabase();
 
-        setStreak(
-          calculateSupabaseStreak(history, today),
-        );
+        setStreak(calculateSupabaseStreak(history, today));
       } else {
         setIsLoggedIn(false);
 
@@ -193,23 +191,23 @@ export default function Summary() {
   }
 
   return (
-    <main className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden px-6 py-16">
-      <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
+    <main className="relative flex min-h-[calc(100dvh-4rem)] items-center overflow-hidden px-6 py-12 [@media(max-height:900px)]:py-8 [@media(max-height:760px)]:py-5">
+      <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl [@media(max-height:900px)]:h-80 [@media(max-height:900px)]:w-80" />
 
       <Container className="relative max-w-3xl text-center">
         <p className="text-sm font-medium uppercase tracking-[0.28em] text-cyan-300">
           Daily Summary
         </p>
 
-        <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+        <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl [@media(max-height:760px)]:mt-4">
           Challenge complete.
         </h1>
 
-        <p className="mx-auto mt-4 max-w-xl text-slate-400">
-          You completed all five stages of today&apos;s challenge.
+        <p className="mx-auto mt-4 max-w-xl text-base font-medium text-slate-300">
+          Here&apos;s how you did today.
         </p>
 
-        <div className="mt-10">
+        <div className="mt-8 [@media(max-height:900px)]:mt-6">
           <p className="text-sm uppercase tracking-[0.24em] text-slate-500">
             Total Score
           </p>
@@ -220,7 +218,7 @@ export default function Summary() {
         </div>
 
         {isLoggedIn && (
-          <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-3">
+          <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-3 [@media(max-height:900px)]:mt-6">
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
               <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
                 Current Streak
@@ -245,7 +243,7 @@ export default function Summary() {
           </div>
         )}
 
-        <div className="mx-auto mt-12 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-5">
+        <div className="mx-auto mt-9 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-5 [@media(max-height:900px)]:mt-7">
           {dailyChallenge.map((stage) => {
             const result = results.find(
               (item) => item.stageId === stage.id,
@@ -273,14 +271,14 @@ export default function Summary() {
         </div>
 
         {!isLoggedIn && (
-          <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] px-6 py-6">
+          <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] px-6 py-6 [@media(max-height:900px)]:mt-7 [@media(max-height:900px)]:py-5">
             <p className="text-lg font-semibold text-white">
               Want to keep this score?
             </p>
 
             <p className="mt-2 text-sm leading-6 text-slate-400">
               Create a free account to save your results, build your
-              streak and compete on the leaderboard.
+              streak and join the leaderboard.
             </p>
 
             <div className="mt-5">
@@ -291,7 +289,7 @@ export default function Summary() {
           </div>
         )}
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-4 [@media(max-height:900px)]:mt-7">
           <button
             type="button"
             onClick={handleShare}
@@ -322,9 +320,9 @@ export default function Summary() {
 
           <a
             href="/"
-            className="min-w-28 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-3.5 font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white"
+            className="min-w-36 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-3.5 font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white"
           >
-            Done
+            Back to Home →
           </a>
         </div>
       </Container>

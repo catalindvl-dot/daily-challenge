@@ -32,9 +32,9 @@ export default async function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <header className="relative z-50 border-b border-white/5">
-          <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
+      <body className="flex min-h-full flex-col">
+        <header className="relative z-50 h-16 shrink-0 border-b border-white/5">
+          <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-between px-6">
             <Link
               href="/"
               className="text-lg font-semibold tracking-tight text-white"
