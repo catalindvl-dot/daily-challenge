@@ -7,14 +7,15 @@ import Container from "@/components/ui/Container";
 import { APP_CONFIG } from "@/lib/config";
 import { createClient } from "@/utils/supabase/client";
 import { getGuestStorageId } from "@/utils/guest";
-import { getKaxiroDate } from "@/utils/date";
 
-export default function ChallengeIntro() {
+type ChallengeIntroProps = {
+  today: string;
+};
+
+export default function ChallengeIntro({ today }: ChallengeIntroProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasProgress, setHasProgress] = useState(false);
-
-  const today = getKaxiroDate();
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -76,17 +77,17 @@ export default function ChallengeIntro() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:28px_28px]" />
 
       <div
-        className={`pointer-events-none absolute left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl transition-all duration-300 [@media(max-height:900px)]:h-72 [@media(max-height:900px)]:w-72 ${isVisible
-          ? "top-16 scale-100 opacity-100 [@media(max-height:900px)]:top-10"
-          : "top-32 scale-125 opacity-70 [@media(max-height:900px)]:top-20"
-          }`}
+        className={`pointer-events-none absolute left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl transition-all duration-300 [@media(max-height:900px)]:h-72 [@media(max-height:900px)]:w-72 ${
+          isVisible
+            ? "top-16 scale-100 opacity-100 [@media(max-height:900px)]:top-10"
+            : "top-32 scale-125 opacity-70 [@media(max-height:900px)]:top-20"
+        }`}
       />
 
       <Container
-        className={`relative max-w-3xl translate-y-12 text-center transition-all duration-300 [@media(max-height:900px)]:translate-y-6 [@media(max-height:760px)]:translate-y-2 ${isVisible
-            ? "opacity-100"
-            : "opacity-0"
-          }`}
+        className={`relative max-w-3xl translate-y-12 text-center transition-all duration-300 [@media(max-height:900px)]:translate-y-6 [@media(max-height:760px)]:translate-y-2 ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}
       >
         <div>
           <p className="text-sm font-medium uppercase tracking-[0.28em] text-cyan-300">
@@ -103,7 +104,7 @@ export default function ChallengeIntro() {
           </div>
         </div>
 
-        <div className="mx-auto mt-10 max-w-xl border-y border-white/[0.07] py-8 [@media(max-height:900px)]:mt-7 [@media(max-height:900px)]:py-6 [@media(max-height:760px)]:mt-5 [@media(max-height:760px)]:py-5">
+        <div className="mx-auto mt-8 max-w-xl border-y border-white/[0.07] py-6 sm:mt-10 sm:py-8 sm:[@media(max-height:900px)]:mt-7 sm:[@media(max-height:900px)]:py-6 sm:[@media(max-height:760px)]:mt-5 sm:[@media(max-height:760px)]:py-5">
           <p className="text-3xl font-semibold tracking-tight text-white [@media(max-height:760px)]:text-2xl">
             {isCompleted
               ? "Today's challenge is complete."
@@ -123,17 +124,11 @@ export default function ChallengeIntro() {
 
         <div className="mt-8 [@media(max-height:900px)]:mt-6 [@media(max-height:760px)]:mt-4">
           {isCompleted ? (
-            <Button href="/summary">
-              View Results →
-            </Button>
+            <Button href="/summary">View Results →</Button>
           ) : hasProgress ? (
-            <Button href="/play">
-              Continue Challenge →
-            </Button>
+            <Button href="/play">Continue Challenge →</Button>
           ) : (
-            <Button href="/play">
-              Begin →
-            </Button>
+            <Button href="/play">Begin →</Button>
           )}
         </div>
       </Container>

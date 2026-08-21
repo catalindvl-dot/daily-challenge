@@ -86,31 +86,31 @@ export default function Connection({
     <div className="text-center">
       <GameLabel icon="🔗" label="Connection" />
 
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:mt-4 sm:text-3xl">
         What do these have in common?
       </h1>
 
-      <p className="mt-4 text-slate-400">
+      <p className="mt-3 text-slate-400 sm:mt-4">
         Find the connection using as little information as possible.
       </p>
 
-      <p className="mt-2 text-sm text-slate-500">
+      <p className="mt-1.5 text-sm text-slate-500 sm:mt-2">
         One guess per clue. Each new clue lowers the score.
       </p>
 
-      <div className="mx-auto mt-7 grid max-w-xl gap-2.5">
+      <div className="mx-auto mt-4 grid max-w-xl gap-1.5 sm:mt-7 sm:gap-2.5">
         {connectionChallenge.clues
           .slice(0, visibleClues)
           .map((clue, index) => (
             <div
               key={clue}
-              className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3"
+              className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2 sm:py-3"
             >
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 Clue {index + 1}
               </p>
 
-              <p className="mt-1.5 text-base font-medium text-white">
+              <p className="mt-1 text-base font-medium text-white sm:mt-1.5">
                 {clue}
               </p>
             </div>
@@ -118,7 +118,7 @@ export default function Connection({
       </div>
 
       {!isComplete && (
-        <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+        <div className="mt-2.5 flex items-center justify-center gap-3 text-sm sm:mt-4">
           <span className="text-slate-500">
             Clue {visibleClues} of{" "}
             {connectionChallenge.clues.length}
@@ -134,7 +134,7 @@ export default function Connection({
 
       {!isComplete ? (
         <>
-          <div className="mx-auto mt-5 max-w-md">
+          <div className="mx-auto mt-3.5 max-w-md sm:mt-5">
             <input
               type="text"
               value={guess}
@@ -151,12 +151,12 @@ export default function Connection({
           </div>
 
           {isCorrect === false && (
-            <p className="mt-3 text-sm text-slate-400">
+            <p className="mt-2.5 text-sm text-slate-400 sm:mt-3">
               Not quite. Reveal another clue to try again.
             </p>
           )}
 
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-2.5 flex flex-wrap items-center justify-center gap-3 sm:mt-5">
             <button
               type="button"
               onClick={handleSubmit}
@@ -180,10 +180,10 @@ export default function Connection({
           </div>
         </>
       ) : (
-        <div className="mt-6">
+        <div className="mt-4 sm:mt-6">
           {isCorrect ? (
             <>
-              <p className="text-lg font-semibold text-cyan-300">
+              <p className="text-base font-semibold text-cyan-300 sm:text-lg">
                 Correct! The connection is{" "}
                 {connectionChallenge.answer}.
               </p>
@@ -194,7 +194,7 @@ export default function Connection({
             </>
           ) : (
             <>
-              <p className="text-lg font-semibold text-slate-300">
+              <p className="text-base font-semibold text-slate-300 sm:text-lg">
                 The connection was{" "}
                 {connectionChallenge.answer}.
               </p>

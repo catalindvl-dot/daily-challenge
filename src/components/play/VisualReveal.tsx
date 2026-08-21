@@ -88,19 +88,19 @@ export default function VisualReveal({
     <div className="text-center">
       <GameLabel icon="👁" label="Visual Reveal" />
 
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:mt-4 sm:text-3xl">
         What are you looking at?
       </h1>
 
-      <p className="mt-4 text-slate-400">
+      <p className="mt-3 text-slate-400 sm:mt-4">
         Identify it as early as possible.
       </p>
 
-      <p className="mt-2 text-sm text-slate-500">
+      <p className="mt-1.5 text-sm text-slate-500 sm:mt-2">
         One guess per reveal. Each reveal lowers the score.
       </p>
 
-      <div className="mx-auto mt-6 max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+      <div className="mx-auto mt-5 max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-black/20 sm:mt-6">
         <div className="aspect-[16/9] overflow-hidden">
           <img
             src={visualRevealChallenge.image}
@@ -130,7 +130,7 @@ export default function VisualReveal({
 
       {!isComplete ? (
         <>
-          <div className="mx-auto mt-5 max-w-md">
+          <div className="mx-auto mt-4 max-w-md sm:mt-5">
             <input
               type="text"
               value={guess}
@@ -152,7 +152,7 @@ export default function VisualReveal({
             </p>
           )}
 
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-3 sm:mt-5">
             <button
               type="button"
               onClick={handleSubmit}
@@ -174,10 +174,10 @@ export default function VisualReveal({
           </div>
         </>
       ) : (
-        <div className="mt-5">
+        <div className="mt-4 sm:mt-5">
           {isCorrect ? (
             <>
-              <p className="text-lg font-semibold text-cyan-300">
+              <p className="text-base font-semibold text-cyan-300 sm:text-lg">
                 Correct! It&apos;s the{" "}
                 {visualRevealChallenge.answer}.
               </p>
@@ -188,7 +188,7 @@ export default function VisualReveal({
             </>
           ) : (
             <>
-              <p className="text-lg font-semibold text-slate-300">
+              <p className="text-base font-semibold text-slate-300 sm:text-lg">
                 The answer was{" "}
                 {visualRevealChallenge.answer}.
               </p>

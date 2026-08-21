@@ -191,51 +191,51 @@ export default function Summary() {
   }
 
   return (
-    <main className="relative flex min-h-[calc(100dvh-4rem)] items-center overflow-hidden px-6 py-12 [@media(max-height:900px)]:py-8 [@media(max-height:760px)]:py-5">
+    <main className="relative flex min-h-[calc(100dvh-4rem)] items-center overflow-hidden px-4 py-4 sm:px-6 sm:py-12 sm:[@media(max-height:900px)]:py-8 sm:[@media(max-height:760px)]:py-5">
       <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl [@media(max-height:900px)]:h-80 [@media(max-height:900px)]:w-80" />
 
       <Container className="relative max-w-3xl text-center">
-        <p className="text-sm font-medium uppercase tracking-[0.28em] text-cyan-300">
+        <p className="text-xs font-medium uppercase tracking-[0.24em] text-cyan-300 sm:text-sm sm:tracking-[0.28em]">
           Daily Summary
         </p>
 
-        <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl [@media(max-height:760px)]:mt-4">
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:mt-6 sm:text-5xl [@media(max-height:760px)]:mt-4">
           Challenge complete.
         </h1>
 
-        <p className="mx-auto mt-4 max-w-xl text-base font-medium text-slate-300">
+        <p className="mx-auto mt-3 max-w-xl text-sm font-medium text-slate-300 sm:mt-4 sm:text-base">
           Here&apos;s how you did today.
         </p>
 
-        <div className="mt-8 [@media(max-height:900px)]:mt-6">
-          <p className="text-sm uppercase tracking-[0.24em] text-slate-500">
+        <div className="mt-5 sm:mt-8 sm:[@media(max-height:900px)]:mt-6">
+          <p className="text-xs uppercase tracking-[0.2em] text-slate-500 sm:text-sm sm:tracking-[0.24em]">
             Total Score
           </p>
 
-          <p className="mt-2 text-5xl font-semibold text-cyan-300">
+          <p className="mt-1 text-4xl font-semibold text-cyan-300 sm:mt-2 sm:text-5xl">
             {totalScore}%
           </p>
         </div>
 
         {isLoggedIn && (
-          <div className="mx-auto mt-8 grid max-w-md grid-cols-2 gap-3 [@media(max-height:900px)]:mt-6">
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+          <div className="mx-auto mt-6 grid max-w-md grid-cols-2 gap-2.5 sm:mt-8 sm:gap-3 sm:[@media(max-height:900px)]:mt-6">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 sm:px-5 sm:py-4">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-slate-500 sm:text-xs sm:tracking-[0.18em]">
                 Current Streak
               </p>
 
-              <p className="mt-2 text-2xl font-semibold text-white">
+              <p className="mt-1.5 text-lg font-semibold text-white sm:mt-2 sm:text-2xl">
                 🔥 {streak.currentStreak}{" "}
                 {streak.currentStreak === 1 ? "day" : "days"}
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-5 py-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 sm:px-5 sm:py-4">
+              <p className="text-[10px] uppercase tracking-[0.15em] text-slate-500 sm:text-xs sm:tracking-[0.18em]">
                 Best Streak
               </p>
 
-              <p className="mt-2 text-2xl font-semibold text-white">
+              <p className="mt-1.5 text-lg font-semibold text-white sm:mt-2 sm:text-2xl">
                 🏆 {streak.bestStreak}{" "}
                 {streak.bestStreak === 1 ? "day" : "days"}
               </p>
@@ -243,18 +243,23 @@ export default function Summary() {
           </div>
         )}
 
-        <div className="mx-auto mt-9 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-5 [@media(max-height:900px)]:mt-7">
-          {dailyChallenge.map((stage) => {
+        <div className="mx-auto mt-5 grid max-w-xl grid-cols-2 gap-2.5 ... sm:mt-9 sm:max-w-4xl sm:grid-cols-5 sm:gap-4 sm:[@media(max-height:900px)]:mt-7">
+          {dailyChallenge.map((stage, index) => {
             const result = results.find(
               (item) => item.stageId === stage.id,
             );
 
+            const isLastOddCard =
+              dailyChallenge.length % 2 !== 0 &&
+              index === dailyChallenge.length - 1;
+
             return (
               <div
                 key={stage.id}
-                className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-5"
+                className={`rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-center sm:px-4 sm:py-5 ${isLastOddCard ? "col-span-2 sm:col-span-1" : ""
+                  }`}
               >
-                <p className="text-xs uppercase tracking-wider text-slate-500">
+                <p className="text-[10px] uppercase tracking-[0.16em] text-slate-500 sm:text-xs sm:tracking-wider">
                   Stage {stage.id}
                 </p>
 
@@ -262,7 +267,7 @@ export default function Summary() {
                   {stage.title}
                 </p>
 
-                <p className="mt-3 text-xl font-semibold text-cyan-300">
+                <p className="mt-1.5 text-xl font-semibold text-cyan-300 sm:mt-3">
                   {result ? `${result.score}%` : "—"}
                 </p>
               </div>
@@ -271,8 +276,8 @@ export default function Summary() {
         </div>
 
         {!isLoggedIn && (
-          <div className="mx-auto mt-10 max-w-xl rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] px-6 py-6 [@media(max-height:900px)]:mt-7 [@media(max-height:900px)]:py-5">
-            <p className="text-lg font-semibold text-white">
+          <div className="mx-auto mt-5 max-w-xl rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.05] px-4 py-3 sm:mt-10 sm:px-6 sm:py-6 sm:[@media(max-height:900px)]:mt-7 sm:[@media(max-height:900px)]:py-5">
+            <p className="text-base font-semibold text-white sm:text-lg">
               Want to keep this score?
             </p>
 
@@ -281,7 +286,7 @@ export default function Summary() {
               streak and join the leaderboard.
             </p>
 
-            <div className="mt-5">
+            <div className="mt-4 sm:mt-5">
               <Button href="/register">
                 Create free account →
               </Button>
@@ -289,11 +294,11 @@ export default function Summary() {
           </div>
         )}
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4 [@media(max-height:900px)]:mt-7">
+        <div className="mt-4 flex items-center justify-center gap-2 sm:mt-10 sm:gap-4 sm:[@media(max-height:900px)]:mt-7">
           <button
             type="button"
             onClick={handleShare}
-            className="flex min-w-48 items-center justify-center gap-3 rounded-xl bg-cyan-300 px-8 py-3.5 font-medium text-slate-950 transition hover:bg-cyan-200"
+            className="flex min-w-0 flex-[1.25] items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-cyan-300 px-4 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 sm:min-w-48 sm:flex-none sm:gap-3 sm:px-8 sm:py-3.5"
           >
             {shareStatus === "copied" ? (
               "Copied! ✓"
@@ -302,7 +307,7 @@ export default function Summary() {
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
-                  className="h-6 w-6"
+                  className="h-5 w-5 sm:h-6 sm:w-6"
                   stroke="currentColor"
                   strokeWidth="2.25"
                   strokeLinecap="round"
@@ -320,9 +325,9 @@ export default function Summary() {
 
           <a
             href="/"
-            className="min-w-36 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-3.5 font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white"
+            className="min-w-0 flex-1 whitespace-nowrap rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white sm:min-w-36 sm:flex-none sm:px-6 sm:py-3.5"
           >
-            Back to Home →
+            Home →
           </a>
         </div>
       </Container>

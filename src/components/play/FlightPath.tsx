@@ -36,14 +36,14 @@ export default function FlightPath({
     errorPercent <= 3
       ? 100
       : Math.max(
-        0,
-        Math.min(
-          99,
-          Math.round(
-            100 * (1 - (errorPercent - 3) / 97),
+          0,
+          Math.min(
+            99,
+            Math.round(
+              100 * (1 - (errorPercent - 3) / 97),
+            ),
           ),
-        ),
-      );
+        );
 
   const handleSliderChange = (value: number) => {
     const clampedValue = Math.min(
@@ -80,19 +80,19 @@ export default function FlightPath({
     <div className="text-center">
       <GameLabel icon="✈" label="Flight Path" />
 
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:mt-4 sm:text-3xl">
         {flightPathChallenge.from} → {flightPathChallenge.to}
       </h1>
 
-      <p className="mt-4 text-slate-400">
+      <p className="mt-3 text-slate-400 sm:mt-4">
         How far apart are these cities?
       </p>
 
-      <p className="mt-2 text-sm text-slate-500">
+      <p className="mt-1.5 text-sm text-slate-500 sm:mt-2">
         Get within 3% for a perfect score.
       </p>
 
-      <div className="mt-8 flex items-center justify-center gap-2">
+      <div className="mt-6 flex items-center justify-center gap-2 sm:mt-8">
         <input
           type="number"
           min="0"
@@ -103,11 +103,11 @@ export default function FlightPath({
           onChange={(event) =>
             handleInputChange(event.target.value)
           }
-          className="w-40 appearance-none rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center text-2xl font-semibold text-cyan-300 outline-none transition focus:border-cyan-300/50 disabled:cursor-not-allowed disabled:opacity-50 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="w-36 appearance-none rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 text-center text-2xl font-semibold text-cyan-300 outline-none transition focus:border-cyan-300/50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-40 sm:px-4 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           aria-label="Distance guess in kilometers"
         />
 
-        <span className="text-2xl font-semibold text-cyan-300">
+        <span className="text-xl font-semibold text-cyan-300 sm:text-2xl">
           km
         </span>
       </div>
@@ -122,7 +122,7 @@ export default function FlightPath({
         onChange={(event) =>
           handleSliderChange(Number(event.target.value))
         }
-        className="mt-6 w-full disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-5 w-full disabled:cursor-not-allowed disabled:opacity-50 sm:mt-6"
       />
 
       {!isLocked ? (
@@ -132,12 +132,12 @@ export default function FlightPath({
             setIsLocked(true);
             onComplete(accuracy);
           }}
-          className="mt-8 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200"
+          className="mt-6 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 sm:mt-8"
         >
           Lock Guess →
         </button>
       ) : (
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           <p className="text-sm text-slate-500">
             Actual distance
           </p>
@@ -146,7 +146,7 @@ export default function FlightPath({
             {flightPathChallenge.distanceKm.toLocaleString()} km
           </p>
 
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="mt-3 text-sm text-slate-400 sm:mt-4">
             Your accuracy
           </p>
 

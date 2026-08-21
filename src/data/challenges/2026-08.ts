@@ -77,4 +77,5 @@ export const august2026Challenges: DailyChallengeConfig[] = [
       { type: "price-guess", contentId: "action-camera" },
     ],
   },
+  
 ];

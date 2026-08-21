@@ -1,5 +1,9 @@
 import ChallengeIntro from "./ChallengeIntro";
 
-export default function Challenge() {
-  return <ChallengeIntro />;
+type ChallengeProps = {
+  today: string;
+};
+
+export default function Challenge({ today }: ChallengeProps) {
+  return <ChallengeIntro today={today} />;
 }

@@ -31,9 +31,11 @@ export default function Timeline({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(
     null,
   );
+
   const [dragOverIndex, setDragOverIndex] = useState<
     number | null
   >(null);
+
   const [isLocked, setIsLocked] = useState(false);
   const [score, setScore] = useState<number | null>(null);
 
@@ -58,6 +60,7 @@ export default function Timeline({
 
     setEvents((currentEvents) => {
       const updatedEvents = [...currentEvents];
+
       const [draggedEvent] = updatedEvents.splice(
         draggedIndex,
         1,
@@ -117,7 +120,13 @@ export default function Timeline({
     showDragHandle: boolean,
   ) => {
     return (
-      <div className={showDragHandle ? "space-y-3" : "space-y-2"}>
+      <div
+        className={
+          showDragHandle
+            ? "space-y-2 sm:space-y-3"
+            : "space-y-2"
+        }
+      >
         {timelineEvents.map((event, index) => (
           <div
             key={event.id}
@@ -146,28 +155,26 @@ export default function Timeline({
               setDraggedIndex(null);
               setDragOverIndex(null);
             }}
-            className={`rounded-xl border px-4 transition ${
-              showDragHandle ? "py-4" : "py-3"
-            } ${
-              showDragHandle
+            className={`rounded-xl border transition ${showDragHandle
+              ? "px-4 py-3 sm:py-4"
+              : "px-3 py-2.5 sm:px-4 sm:py-3"
+              } ${showDragHandle
                 ? "cursor-grab active:cursor-grabbing"
                 : "cursor-default"
-            } ${
-              showDragHandle &&
-              dragOverIndex === index &&
-              draggedIndex !== index
+              } ${showDragHandle &&
+                dragOverIndex === index &&
+                draggedIndex !== index
                 ? "border-cyan-300/50 bg-cyan-300/10"
                 : "border-white/10 bg-white/[0.03]"
-            } ${
-              showDragHandle && draggedIndex === index
+              } ${showDragHandle && draggedIndex === index
                 ? "opacity-40"
                 : "opacity-100"
-            }`}
+              }`}
           >
-            <div className="flex items-center gap-4 text-left">
+            <div className="flex items-center gap-3 text-left sm:gap-4">
               {showDragHandle && (
                 <span
-                  className="select-none text-xl text-slate-600"
+                  className="select-none text-lg text-slate-600 sm:text-xl"
                   aria-hidden="true"
                 >
                   ⋮⋮
@@ -175,12 +182,18 @@ export default function Timeline({
               )}
 
               <div>
-                <p className="font-medium text-white">
+                <p
+                  className={
+                    showDragHandle
+                      ? "font-medium text-white"
+                      : "text-sm font-medium leading-5 text-white sm:text-base sm:leading-normal"
+                  }
+                >
                   {event.title}
                 </p>
 
                 {isLocked && (
-                  <p className="mt-1 text-sm text-cyan-300">
+                  <p className="mt-1 text-xs text-cyan-300 sm:text-sm">
                     {event.year}
                   </p>
                 )}
@@ -196,34 +209,33 @@ export default function Timeline({
     <div className="text-center">
       <GameLabel icon="⏳" label="Timeline" />
 
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:mt-4 sm:text-3xl">
         Put these events in order
       </h1>
 
-      <p className="mt-4 text-slate-400">
+      <p className="mt-3 text-slate-400 sm:mt-4">
         Oldest to newest
       </p>
 
       {!isLocked && (
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-1.5 text-sm text-slate-500 sm:mt-2">
           Drag the events to rearrange them.
         </p>
       )}
 
       {!isLocked ? (
-        <div className="mx-auto mt-8 max-w-xl">
+        <div className="mx-auto mt-6 max-w-xl sm:mt-8">
           {renderTimelineList(events, true)}
         </div>
       ) : (
         <>
           {score !== null && (
-            <div className="mt-5">
+            <div className="mt-4 sm:mt-5">
               <p
-                className={`text-lg font-semibold ${
-                  score === 100
-                    ? "text-cyan-300"
-                    : "text-slate-300"
-                }`}
+                className={`text-base font-semibold sm:text-lg ${score === 100
+                  ? "text-cyan-300"
+                  : "text-slate-300"
+                  }`}
               >
                 {score === 100
                   ? "Perfect! You got the timeline right."
@@ -237,9 +249,9 @@ export default function Timeline({
           )}
 
           {userOrder && correctOrder && (
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:mt-5 sm:gap-4">
               <div>
-                <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-slate-500">
+                <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-slate-500 sm:mb-3">
                   Your order
                 </p>
 
@@ -247,7 +259,7 @@ export default function Timeline({
               </div>
 
               <div>
-                <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-cyan-300">
+                <p className="mb-2 text-sm font-medium uppercase tracking-[0.2em] text-cyan-300 sm:mb-3">
                   Correct order
                 </p>
 
@@ -262,7 +274,7 @@ export default function Timeline({
         <button
           type="button"
           onClick={lockTimeline}
-          className="mt-8 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200"
+          className="mt-6 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 sm:mt-8"
         >
           Lock Timeline →
         </button>

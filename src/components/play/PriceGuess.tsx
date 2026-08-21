@@ -41,14 +41,14 @@ export default function PriceGuess({
     errorPercent <= 5
       ? 100
       : Math.max(
-        0,
-        Math.min(
-          99,
-          Math.round(
-            100 * (1 - (errorPercent - 5) / 95),
+          0,
+          Math.min(
+            99,
+            Math.round(
+              100 * (1 - (errorPercent - 5) / 95),
+            ),
           ),
-        ),
-      );
+        );
 
   const handleInputChange = (value: string) => {
     const digitsOnly = value.replace(/\D/g, "");
@@ -61,6 +61,7 @@ export default function PriceGuess({
 
     setGuess(Number(digitsOnly));
   };
+
   const adjustGuess = (amount: number) => {
     const newGuess = Math.max(0, guess + amount);
 
@@ -72,21 +73,21 @@ export default function PriceGuess({
     <div className="text-center">
       <GameLabel icon="💰" label="Price Guess" />
 
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:mt-4 sm:text-3xl">
         {priceGuessChallenge.name}
       </h1>
 
-      <p className="mt-4 text-slate-400">
+      <p className="mt-3 text-slate-400 sm:mt-4">
         How much does it cost?
       </p>
 
-      <p className="mt-2 text-sm text-slate-500">
+      <p className="mt-1.5 text-sm text-slate-500 sm:mt-2">
         Get within 5% for a perfect score.
       </p>
 
-      <div className="mt-8 flex justify-center">
-        <div className="flex min-w-44 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 transition focus-within:border-cyan-300/50">
-          <span className="mr-1 text-3xl font-semibold text-cyan-300">
+      <div className="mt-6 flex justify-center sm:mt-8">
+        <div className="flex min-w-40 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] px-3 py-3 transition focus-within:border-cyan-300/50 sm:min-w-44 sm:px-4">
+          <span className="mr-1 text-2xl font-semibold text-cyan-300 sm:text-3xl">
             {priceGuessChallenge.currency}
           </span>
 
@@ -102,7 +103,7 @@ export default function PriceGuess({
             style={{
               width: `${Math.max(1, guessInput.length)}ch`,
             }}
-            className="min-w-[1ch] bg-transparent text-left text-3xl font-semibold text-cyan-300 outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-w-[1ch] bg-transparent text-left text-2xl font-semibold text-cyan-300 outline-none disabled:cursor-not-allowed disabled:opacity-50 sm:text-3xl"
           />
 
           {!isLocked && (
@@ -137,12 +138,12 @@ export default function PriceGuess({
             setIsLocked(true);
             onComplete(accuracy);
           }}
-          className="mt-8 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-30"
+          className="mt-6 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-30 sm:mt-8"
         >
           Lock Guess →
         </button>
       ) : (
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           <p className="text-sm text-slate-500">
             Actual price
           </p>
@@ -152,7 +153,7 @@ export default function PriceGuess({
             {priceGuessChallenge.price.toLocaleString()}
           </p>
 
-          <p className="mt-4 text-sm text-slate-400">
+          <p className="mt-3 text-sm text-slate-400 sm:mt-4">
             Your accuracy
           </p>
 

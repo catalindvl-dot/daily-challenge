@@ -74,35 +74,109 @@ export default function Play() {
         `dailyChallengeResults:${currentStorageId}:${today}`,
       );
 
+      let restoredResults: StageResult[] = [];
+
       if (storedResults) {
         try {
-          setResults(JSON.parse(storedResults));
+          restoredResults = JSON.parse(
+            storedResults,
+          ) as StageResult[];
         } catch {
-          setResults([]);
+          restoredResults = [];
         }
       }
 
-      const storedStage = localStorage.getItem(
-        `dailyChallengeStage:${currentStorageId}:${today}`,
+      setResults(restoredResults);
+
+      /*
+       * Results are the source of truth for progression.
+       *
+       * If a stage already has a saved result, the player has
+       * already seen its answer and must not be able to replay it.
+       */
+      const completedStageIds = new Set(
+        restoredResults.map((result) => result.stageId),
       );
 
-      if (storedStage) {
-        const parsedStage = Number(storedStage);
+      const firstIncompleteStageIndex =
+        dailyChallenge.findIndex(
+          (stage) => !completedStageIds.has(stage.id),
+        );
 
-        if (
-          Number.isInteger(parsedStage) &&
-          parsedStage >= 1 &&
-          parsedStage <= totalStages
-        ) {
-          setCurrentStage(parsedStage);
+      /*
+       * Every stage already has a saved result.
+       * This can happen when the user refreshes after completing
+       * Stage 5 but before pressing Finish Challenge.
+       */
+      if (
+        totalStages > 0 &&
+        firstIncompleteStageIndex === -1
+      ) {
+        saveChallengeHistoryEntry(today, restoredResults);
+
+        if (user) {
+          try {
+            await saveChallengeResult(
+              today,
+              restoredResults,
+            );
+          } catch (error) {
+            console.error(
+              "Failed to recover completed challenge:",
+              error,
+            );
+
+            setCurrentStage(totalStages);
+            setStageCompleted(true);
+            setIsCheckingProgress(false);
+
+            return;
+          }
         }
+
+        localStorage.setItem(
+          `dailyChallengeCompleted:${currentStorageId}:${today}`,
+          "true",
+        );
+
+        localStorage.removeItem(
+          `dailyChallengeStage:${currentStorageId}:${today}`,
+        );
+
+        router.replace("/summary");
+        return;
       }
 
+      /*
+       * Resume from the first stage that does not yet have
+       * a result. This also protects completed stages from replay
+       * after a refresh.
+       */
+      const stageToResume = firstIncompleteStageIndex + 1;
+
+      if (
+        stageToResume >= 1 &&
+        stageToResume <= totalStages
+      ) {
+        setCurrentStage(stageToResume);
+
+        localStorage.setItem(
+          `dailyChallengeStage:${currentStorageId}:${today}`,
+          String(stageToResume),
+        );
+      }
+
+      setStageCompleted(false);
       setIsCheckingProgress(false);
     }
 
     loadProgress();
-  }, [router, today, totalStages]);
+  }, [
+    router,
+    today,
+    totalStages,
+    dailyChallenge,
+  ]);
 
   if (isCheckingProgress) {
     return null;
@@ -190,19 +264,19 @@ export default function Play() {
   };
 
   return (
-    <main className="flex min-h-[calc(100dvh-4rem)] items-start justify-center px-6 pb-8 pt-10 [@media(max-height:900px)]:pb-6 [@media(max-height:900px)]:pt-6 [@media(max-height:760px)]:pb-4 [@media(max-height:760px)]:pt-4">
+    <main className="flex min-h-[calc(100dvh-4rem)] items-start justify-center px-4 pb-5 pt-5 sm:px-6 sm:pb-8 sm:pt-10 sm:[@media(max-height:900px)]:pb-6 sm:[@media(max-height:900px)]:pt-6 sm:[@media(max-height:760px)]:pb-4 sm:[@media(max-height:760px)]:pt-4">
       <div className="w-full max-w-3xl">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium uppercase tracking-[0.28em] text-cyan-300">
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-cyan-300 sm:text-sm sm:tracking-[0.28em]">
             Stage {currentStage} of {totalStages}
           </p>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-xs text-slate-500 sm:text-sm">
             {currentStage}/{totalStages}
           </p>
         </div>
 
-        <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/10 [@media(max-height:760px)]:mt-3">
+        <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10 sm:mt-4 sm:[@media(max-height:760px)]:mt-3">
           <div
             className="h-full rounded-full bg-cyan-300 transition-all duration-300"
             style={{
@@ -211,7 +285,7 @@ export default function Play() {
           />
         </div>
 
-        <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.03] p-8 text-center [@media(max-height:900px)]:mt-7 [@media(max-height:900px)]:p-6 [@media(max-height:760px)]:mt-5 [@media(max-height:760px)]:p-5">
+        <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-center sm:mt-10 sm:p-8 sm:[@media(max-height:900px)]:mt-7 sm:[@media(max-height:900px)]:p-6 sm:[@media(max-height:760px)]:mt-5 sm:[@media(max-height:760px)]:p-5">
           {stage.type === "flight-path" ? (
             <FlightPath
               contentId={stage.contentId}
@@ -254,7 +328,7 @@ export default function Play() {
           )}
 
           {stageCompleted && (
-            <div className="mt-6 flex justify-center [@media(max-height:760px)]:mt-4">
+            <div className="mt-5 flex justify-center sm:mt-6 sm:[@media(max-height:760px)]:mt-4">
               <button
                 type="button"
                 onClick={handleContinue}
