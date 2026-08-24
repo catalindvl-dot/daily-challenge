@@ -7,6 +7,7 @@ import Container from "@/components/ui/Container";
 import { APP_CONFIG } from "@/lib/config";
 import { createClient } from "@/utils/supabase/client";
 import { getGuestStorageId } from "@/utils/guest";
+import { getDailyChallenge } from "@/data/dailyChallenge";
 
 type ChallengeIntroProps = {
   today: string;
@@ -16,6 +17,9 @@ export default function ChallengeIntro({ today }: ChallengeIntroProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [hasProgress, setHasProgress] = useState(false);
+
+  const challenge = getDailyChallenge(today);
+  const hasChallenge = Boolean(challenge?.stages?.length);
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -28,6 +32,14 @@ export default function ChallengeIntro({ today }: ChallengeIntroProps) {
     const supabase = createClient();
 
     async function checkChallengeStatus() {
+      if (!hasChallenge) {
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+        });
+
+        return;
+      }
+
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -70,7 +82,7 @@ export default function ChallengeIntro({ today }: ChallengeIntroProps) {
     }
 
     checkChallengeStatus();
-  }, [today]);
+  }, [today, hasChallenge]);
 
   return (
     <main className="relative flex min-h-[calc(100dvh-4rem)] items-start justify-center overflow-hidden px-6 pb-8 pt-32 [@media(max-height:900px)]:pt-20 [@media(max-height:760px)]:pt-12">
@@ -106,24 +118,30 @@ export default function ChallengeIntro({ today }: ChallengeIntroProps) {
 
         <div className="mx-auto mt-8 max-w-xl border-y border-white/[0.07] py-6 sm:mt-10 sm:py-8 sm:[@media(max-height:900px)]:mt-7 sm:[@media(max-height:900px)]:py-6 sm:[@media(max-height:760px)]:mt-5 sm:[@media(max-height:760px)]:py-5">
           <p className="text-3xl font-semibold tracking-tight text-white [@media(max-height:760px)]:text-2xl">
-            {isCompleted
-              ? "Today's challenge is complete."
-              : hasProgress
-                ? "Your challenge is in progress."
-                : "A new challenge is ready."}
+            {!hasChallenge
+              ? "No challenge available for today."
+              : isCompleted
+                ? "Today's challenge is complete."
+                : hasProgress
+                  ? "Your challenge is in progress."
+                  : "A new challenge is ready."}
           </p>
 
           <p className="mt-3 text-slate-400 [@media(max-height:760px)]:mt-2">
-            {isCompleted
-              ? "Come back tomorrow for a fresh set of challenges."
-              : hasProgress
-                ? "Pick up where you left off."
-                : "Five fresh challenges are waiting for you."}
+            {!hasChallenge
+              ? "Come back soon for a fresh set of challenges."
+              : isCompleted
+                ? "Come back tomorrow for a fresh set of challenges."
+                : hasProgress
+                  ? "Pick up where you left off."
+                  : "Five fresh challenges are waiting for you."}
           </p>
         </div>
 
         <div className="mt-8 [@media(max-height:900px)]:mt-6 [@media(max-height:760px)]:mt-4">
-          {isCompleted ? (
+          {!hasChallenge ? (
+            <Button href="/">Home →</Button>
+          ) : isCompleted ? (
             <Button href="/summary">View Results →</Button>
           ) : hasProgress ? (
             <Button href="/play">Continue Challenge →</Button>

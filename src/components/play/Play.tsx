@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getDailyChallenge } from "@/data/dailyChallenge";
 import type { StageResult } from "@/types/challenge";
@@ -19,9 +19,15 @@ export default function Play() {
   const router = useRouter();
 
   const today = getKaxiroDate();
-  const challenge = getDailyChallenge(today);
 
-  const dailyChallenge = challenge?.stages ?? [];
+  const challenge = useMemo(() => {
+    return getDailyChallenge(today);
+  }, [today]);
+
+  const dailyChallenge = useMemo(() => {
+    return challenge?.stages ?? [];
+  }, [challenge]);
+
   const totalStages = dailyChallenge.length;
 
   const [currentStage, setCurrentStage] = useState(1);
@@ -31,13 +37,35 @@ export default function Play() {
   const [storageId, setStorageId] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const [loadError, setLoadError] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+
   useEffect(() => {
     const supabase = createClient();
 
     async function loadProgress() {
+      setLoadError("");
+      setSaveError("");
+
       const {
         data: { user },
+        error: userError,
       } = await supabase.auth.getUser();
+
+      const isMissingSession =
+        userError?.name === "AuthSessionMissingError";
+
+      if (userError && !isMissingSession) {
+        console.error("Failed to check authentication:", userError);
+
+        setLoadError(
+          "We couldn't load your challenge progress. Please try again.",
+        );
+        setIsCheckingProgress(false);
+        return;
+      }
 
       const currentStorageId = user
         ? user.id
@@ -47,12 +75,28 @@ export default function Play() {
       setIsLoggedIn(Boolean(user));
 
       if (user) {
-        const { data: completedResult } = await supabase
+        const {
+          data: completedResult,
+          error: completedResultError,
+        } = await supabase
           .from("challenge_results")
           .select("id")
           .eq("user_id", user.id)
           .eq("challenge_date", today)
           .maybeSingle();
+
+        if (completedResultError) {
+          console.error(
+            "Failed to check completed challenge:",
+            completedResultError,
+          );
+
+          setLoadError(
+            "We couldn't load your challenge progress. Please try again.",
+          );
+          setIsCheckingProgress(false);
+          return;
+        }
 
         if (completedResult) {
           router.replace("/summary");
@@ -115,6 +159,8 @@ export default function Play() {
         saveChallengeHistoryEntry(today, restoredResults);
 
         if (user) {
+          setIsSaving(true);
+
           try {
             await saveChallengeResult(
               today,
@@ -128,10 +174,16 @@ export default function Play() {
 
             setCurrentStage(totalStages);
             setStageCompleted(true);
+            setSaveError(
+              "We couldn't save your result. Check your connection and try again.",
+            );
+            setIsSaving(false);
             setIsCheckingProgress(false);
 
             return;
           }
+
+          setIsSaving(false);
         }
 
         localStorage.setItem(
@@ -176,18 +228,55 @@ export default function Play() {
     today,
     totalStages,
     dailyChallenge,
+    retryCount,
   ]);
+
+  const handleRetryLoad = () => {
+    setIsCheckingProgress(true);
+    setLoadError("");
+    setRetryCount((current) => current + 1);
+  };
 
   if (isCheckingProgress) {
     return null;
   }
 
+  if (loadError) {
+    return (
+      <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6">
+        <div className="text-center">
+          <p className="text-slate-400">
+            {loadError}
+          </p>
+
+          <button
+            type="button"
+            onClick={handleRetryLoad}
+            className="mt-5 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200"
+          >
+            Try Again
+          </button>
+        </div>
+      </main>
+    );
+  }
+
   if (!challenge || totalStages === 0) {
     return (
       <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6">
-        <p className="text-slate-400">
-          No challenge available for today.
-        </p>
+        <div className="text-center">
+          <p className="text-slate-400">
+            No challenge available for today.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => router.push("/")}
+            className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] px-6 py-3 font-medium text-slate-300 transition hover:border-white/20 hover:bg-white/[0.05] hover:text-white"
+          >
+            Home →
+          </button>
+        </div>
       </main>
     );
   }
@@ -221,12 +310,22 @@ export default function Play() {
   };
 
   const handleContinue = async () => {
-    if (!stageCompleted || !storageId) return;
+    if (
+      !stageCompleted ||
+      !storageId ||
+      isSaving
+    ) {
+      return;
+    }
+
+    setSaveError("");
 
     if (currentStage === totalStages) {
       saveChallengeHistoryEntry(today, results);
 
       if (isLoggedIn) {
+        setIsSaving(true);
+
         try {
           await saveChallengeResult(today, results);
         } catch (error) {
@@ -235,8 +334,14 @@ export default function Play() {
             error,
           );
 
+          setSaveError(
+            "We couldn't save your result. Check your connection and try again.",
+          );
+          setIsSaving(false);
           return;
         }
+
+        setIsSaving(false);
       }
 
       localStorage.setItem(
@@ -261,6 +366,7 @@ export default function Play() {
 
     setCurrentStage(nextStage);
     setStageCompleted(false);
+    setSaveError("");
   };
 
   return (
@@ -328,15 +434,24 @@ export default function Play() {
           )}
 
           {stageCompleted && (
-            <div className="mt-5 flex justify-center sm:mt-6 sm:[@media(max-height:760px)]:mt-4">
+            <div className="mt-5 flex flex-col items-center sm:mt-6 sm:[@media(max-height:760px)]:mt-4">
+              {saveError && (
+                <p className="mb-4 max-w-md text-sm text-rose-300">
+                  {saveError}
+                </p>
+              )}
+
               <button
                 type="button"
                 onClick={handleContinue}
-                className="rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200"
+                disabled={isSaving}
+                className="rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {currentStage === totalStages
-                  ? "Finish Challenge →"
-                  : "Continue →"}
+                {isSaving
+                  ? "Saving..."
+                  : currentStage === totalStages
+                    ? "Finish Challenge →"
+                    : "Continue →"}
               </button>
             </div>
           )}

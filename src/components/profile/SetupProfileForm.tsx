@@ -23,6 +23,10 @@ export default function SetupProfileForm() {
             setMessage("Username must be at least 3 characters.");
             return;
         }
+        if (cleanUsername.length > 20) {
+            setMessage("Username must be 20 characters or fewer.");
+            return;
+        }
 
         if (!/^[a-z0-9_]+$/.test(cleanUsername)) {
             setMessage(
