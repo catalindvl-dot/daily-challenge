@@ -134,7 +134,7 @@ export default function LandingHero({
         : "Start Challenge →";
 
   return (
-    <main className="relative flex min-h-[calc(100dvh-4rem)] items-center overflow-hidden px-5 py-8 sm:px-6 sm:py-12 [@media(max-height:900px)]:py-8 [@media(max-height:760px)]:py-4">
+    <main className="relative flex flex-1 items-center overflow-hidden px-5 py-8 sm:px-6 sm:py-12 [@media(max-height:900px)]:py-8 [@media(max-height:760px)]:py-4">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:28px_28px]" />
 
       <div

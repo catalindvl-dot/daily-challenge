@@ -191,7 +191,7 @@ export default function Summary() {
   }
 
   return (
-    <main className="relative flex min-h-[calc(100dvh-4rem)] items-center overflow-hidden px-4 py-4 sm:px-6 sm:py-12 sm:[@media(max-height:900px)]:py-8 sm:[@media(max-height:760px)]:py-5">
+    <main className="relative flex flex-1 items-center overflow-hidden px-4 py-4 sm:px-6 sm:py-12 sm:[@media(max-height:900px)]:py-8 sm:[@media(max-height:760px)]:py-5">
       <div className="pointer-events-none absolute left-1/2 top-20 h-96 w-96 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl [@media(max-height:900px)]:h-80 [@media(max-height:900px)]:w-80" />
 
       <Container className="relative max-w-3xl text-center">

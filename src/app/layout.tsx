@@ -40,8 +40,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/kaxiro-og.png",
-        width: 1672,
-        height: 941,
+        width: 1200,
+        height: 630,
         alt: "Kaxiro — Where curiosity comes to play.",
       },
     ],
@@ -81,7 +81,40 @@ export default async function RootLayout({
           </div>
         </header>
 
-        {children}
+        <div className="flex flex-1 flex-col">
+          {children}
+        </div>
+
+        <footer className="shrink-0 border-t border-white/5">
+          <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 sm:flex-row">
+            <p className="text-xs text-slate-500 sm:text-slate-400">
+              © 2026 Kaxiro
+            </p>
+
+            <nav className="flex items-center gap-5">
+              <Link
+                href="/privacy"
+                className="text-xs text-slate-500 transition hover:text-white sm:text-slate-400"
+              >
+                Privacy
+              </Link>
+
+              <Link
+                href="/terms"
+                className="text-xs text-slate-500 transition hover:text-white sm:text-slate-400"
+              >
+                Terms
+              </Link>
+
+              <Link
+                href="/contact"
+                className="text-xs text-slate-500 transition hover:text-white sm:text-slate-400"
+              >
+                Contact
+              </Link>
+            </nav>
+          </div>
+        </footer>
       </body>
     </html>
   );
