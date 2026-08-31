@@ -1,11 +1,17 @@
 import { createClient } from "@/utils/supabase/server";
 import { getKaxiroDate } from "@/utils/date";
+import type { Metadata } from "next";
 
 type LeaderboardRow = {
   rank: number;
   user_id: string;
   username: string;
   score: number;
+};
+export const metadata: Metadata = {
+  title: "Leaderboard",
+  description:
+    "See today's Kaxiro leaderboard and compare scores with other challengers.",
 };
 
 export default async function LeaderboardPage() {
@@ -117,11 +123,10 @@ export default async function LeaderboardPage() {
                 return (
                   <div
                     key={entry.user_id}
-                    className={`grid grid-cols-[52px_1fr_64px] items-center border-b border-white/5 px-4 py-3 last:border-b-0 sm:grid-cols-[70px_1fr_90px] sm:px-6 sm:py-4 ${
-                      isCurrentUser
+                    className={`grid grid-cols-[52px_1fr_64px] items-center border-b border-white/5 px-4 py-3 last:border-b-0 sm:grid-cols-[70px_1fr_90px] sm:px-6 sm:py-4 ${isCurrentUser
                         ? "bg-cyan-400/10"
                         : ""
-                    }`}
+                      }`}
                   >
                     <div className="flex w-8 items-center justify-center sm:w-10">
                       <span
@@ -142,11 +147,10 @@ export default async function LeaderboardPage() {
                     </div>
 
                     <p
-                      className={`truncate text-sm font-medium sm:text-base ${
-                        isCurrentUser
+                      className={`truncate text-sm font-medium sm:text-base ${isCurrentUser
                           ? "text-cyan-300"
                           : "text-white"
-                      }`}
+                        }`}
                     >
                       {entry.username}
                       {isCurrentUser ? " (You)" : ""}

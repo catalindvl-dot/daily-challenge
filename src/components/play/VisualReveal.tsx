@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getVisualRevealChallenge } from "@/data/visualReveal";
 import { fuzzyMatch } from "@/utils/fuzzyMatch";
 import GameLabel from "@/components/play/GameLabel";
@@ -8,6 +8,7 @@ import GameLabel from "@/components/play/GameLabel";
 type VisualRevealProps = {
   contentId: string;
   onComplete: (score: number) => void;
+  timeExpired: boolean;
 };
 
 const revealScores = [100, 75, 50, 25];
@@ -15,6 +16,7 @@ const revealScores = [100, 75, 50, 25];
 export default function VisualReveal({
   contentId,
   onComplete,
+  timeExpired,
 }: VisualRevealProps) {
   const visualRevealChallenge =
     getVisualRevealChallenge(contentId);
@@ -70,6 +72,10 @@ export default function VisualReveal({
   };
 
   const handleRevealMore = () => {
+    if (isComplete) {
+      return;
+    }
+
     if (revealLevel >= 3) {
       setIsComplete(true);
       setIsCorrect(false);
@@ -83,6 +89,14 @@ export default function VisualReveal({
     setIsCorrect(null);
     setHasGuessedThisReveal(false);
   };
+
+  useEffect(() => {
+    if (timeExpired && !isComplete) {
+      setIsComplete(true);
+      setIsCorrect(false);
+      onComplete(0);
+    }
+  }, [timeExpired, isComplete, onComplete]);
 
   return (
     <div className="text-center">

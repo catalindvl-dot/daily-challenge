@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import { getDailyChallenge } from "@/data/dailyChallenge";
 import type { StageResult } from "@/types/challenge";
@@ -14,6 +18,20 @@ import { createClient } from "@/utils/supabase/client";
 import { saveChallengeResult } from "@/utils/supabase/saveChallengeResult";
 import { getGuestStorageId } from "@/utils/guest";
 import { getKaxiroDate } from "@/utils/date";
+
+function getStageTimeLimit(gameType: string) {
+  switch (gameType) {
+    case "timeline":
+    case "connection":
+      return 40;
+
+    case "flight-path":
+    case "price-guess":
+    case "visual-reveal":
+    default:
+      return 30;
+  }
+}
 
 export default function Play() {
   const router = useRouter();
@@ -33,14 +51,33 @@ export default function Play() {
   const [currentStage, setCurrentStage] = useState(1);
   const [stageCompleted, setStageCompleted] = useState(false);
   const [results, setResults] = useState<StageResult[]>([]);
-  const [isCheckingProgress, setIsCheckingProgress] = useState(true);
-  const [storageId, setStorageId] = useState<string | null>(null);
+  const [isCheckingProgress, setIsCheckingProgress] =
+    useState(true);
+  const [storageId, setStorageId] = useState<string | null>(
+    null,
+  );
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const [loadError, setLoadError] = useState("");
   const [saveError, setSaveError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+
+  const [timeRemaining, setTimeRemaining] = useState<
+    number | null
+  >(null);
+
+  const stage =
+    totalStages > 0
+      ? dailyChallenge[currentStage - 1]
+      : undefined;
+
+  const stageTimeLimit = stage
+    ? getStageTimeLimit(stage.type)
+    : 30;
+
+  const timeExpired =
+    timeRemaining !== null && timeRemaining <= 0;
 
   useEffect(() => {
     const supabase = createClient();
@@ -58,7 +95,10 @@ export default function Play() {
         userError?.name === "AuthSessionMissingError";
 
       if (userError && !isMissingSession) {
-        console.error("Failed to check authentication:", userError);
+        console.error(
+          "Failed to check authentication:",
+          userError,
+        );
 
         setLoadError(
           "We couldn't load your challenge progress. Please try again.",
@@ -144,7 +184,8 @@ export default function Play() {
 
       const firstIncompleteStageIndex =
         dailyChallenge.findIndex(
-          (stage) => !completedStageIds.has(stage.id),
+          (challengeStage) =>
+            !completedStageIds.has(challengeStage.id),
         );
 
       /*
@@ -204,7 +245,8 @@ export default function Play() {
        * a result. This also protects completed stages from replay
        * after a refresh.
        */
-      const stageToResume = firstIncompleteStageIndex + 1;
+      const stageToResume =
+        firstIncompleteStageIndex + 1;
 
       if (
         stageToResume >= 1 &&
@@ -219,6 +261,7 @@ export default function Play() {
       }
 
       setStageCompleted(false);
+      setTimeRemaining(null);
       setIsCheckingProgress(false);
     }
 
@@ -229,6 +272,76 @@ export default function Play() {
     totalStages,
     dailyChallenge,
     retryCount,
+  ]);
+
+  /*
+   * Persistent stage timer.
+   *
+   * We store an absolute deadline instead of the remaining
+   * seconds so refreshes and tab changes cannot reset the timer.
+   */
+  useEffect(() => {
+    if (
+      isCheckingProgress ||
+      !storageId ||
+      !stage ||
+      stageCompleted
+    ) {
+      return;
+    }
+
+    const timerKey =
+      `dailyChallengeStageDeadline:` +
+      `${storageId}:${today}:${stage.id}`;
+
+    const storedDeadline =
+      localStorage.getItem(timerKey);
+
+    let deadline = Number(storedDeadline);
+
+    if (
+      !storedDeadline ||
+      Number.isNaN(deadline) ||
+      deadline <= 0
+    ) {
+      deadline =
+        Date.now() + stageTimeLimit * 1000;
+
+      localStorage.setItem(
+        timerKey,
+        String(deadline),
+      );
+    }
+
+    const updateTimer = () => {
+      const millisecondsRemaining =
+        deadline - Date.now();
+
+      const secondsRemaining = Math.max(
+        0,
+        Math.ceil(millisecondsRemaining / 1000),
+      );
+
+      setTimeRemaining(secondsRemaining);
+    };
+
+    updateTimer();
+
+    const interval = window.setInterval(
+      updateTimer,
+      250,
+    );
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [
+    isCheckingProgress,
+    storageId,
+    today,
+    stage,
+    stageCompleted,
+    stageTimeLimit,
   ]);
 
   const handleRetryLoad = () => {
@@ -261,7 +374,7 @@ export default function Play() {
     );
   }
 
-  if (!challenge || totalStages === 0) {
+  if (!challenge || totalStages === 0 || !stage) {
     return (
       <main className="flex min-h-[calc(100dvh-4rem)] items-center justify-center px-6">
         <div className="text-center">
@@ -281,9 +394,11 @@ export default function Play() {
     );
   }
 
-  const stage = dailyChallenge[currentStage - 1];
-
   const handleStageComplete = (score: number) => {
+    if (stageCompleted) {
+      return;
+    }
+
     setResults((currentResults) => {
       const updatedResults = [
         ...currentResults.filter(
@@ -305,6 +420,12 @@ export default function Play() {
 
       return updatedResults;
     });
+
+    if (storageId) {
+      localStorage.removeItem(
+        `dailyChallengeStageDeadline:${storageId}:${today}:${stage.id}`,
+      );
+    }
 
     setStageCompleted(true);
   };
@@ -364,10 +485,20 @@ export default function Play() {
       String(nextStage),
     );
 
+    setTimeRemaining(null);
     setCurrentStage(nextStage);
     setStageCompleted(false);
     setSaveError("");
   };
+
+  const formattedTime =
+    timeRemaining === null
+      ? `0:${String(stageTimeLimit).padStart(2, "0")}`
+      : `0:${String(timeRemaining).padStart(2, "0")}`;
+
+  const timerIsUrgent =
+    timeRemaining !== null &&
+    timeRemaining <= 10;
 
   return (
     <main className="flex min-h-[calc(100dvh-4rem)] items-start justify-center px-4 pb-5 pt-5 sm:px-6 sm:pb-8 sm:pt-10 sm:[@media(max-height:900px)]:pb-6 sm:[@media(max-height:900px)]:pt-6 sm:[@media(max-height:760px)]:pb-4 sm:[@media(max-height:760px)]:pt-4">
@@ -377,9 +508,21 @@ export default function Play() {
             Stage {currentStage} of {totalStages}
           </p>
 
-          <p className="text-xs text-slate-500 sm:text-sm">
-            {currentStage}/{totalStages}
-          </p>
+          {!stageCompleted ? (
+            <div
+              className={`flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold tabular-nums transition-colors sm:text-base ${timerIsUrgent
+                  ? "border-rose-400/30 bg-rose-400/10 text-rose-300"
+                  : "border-cyan-300/20 bg-cyan-300/[0.06] text-cyan-200"
+                }`}
+            >
+              <span aria-hidden="true">⏱</span>
+              <span>{formattedTime}</span>
+            </div>
+          ) : (
+            <p className="text-xs text-slate-500 sm:text-sm">
+              {currentStage}/{totalStages}
+            </p>
+          )}
         </div>
 
         <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/10 sm:mt-4 sm:[@media(max-height:760px)]:mt-3">
@@ -394,28 +537,38 @@ export default function Play() {
         <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-4 text-center sm:mt-10 sm:p-8 sm:[@media(max-height:900px)]:mt-7 sm:[@media(max-height:900px)]:p-6 sm:[@media(max-height:760px)]:mt-5 sm:[@media(max-height:760px)]:p-5">
           {stage.type === "flight-path" ? (
             <FlightPath
+              key={`${stage.id}-${stage.contentId}`}
               contentId={stage.contentId}
               onComplete={handleStageComplete}
+              timeExpired={timeExpired}
             />
           ) : stage.type === "price-guess" ? (
             <PriceGuess
+              key={`${stage.id}-${stage.contentId}`}
               contentId={stage.contentId}
               onComplete={handleStageComplete}
+              timeExpired={timeExpired}
             />
           ) : stage.type === "timeline" ? (
             <Timeline
+              key={`${stage.id}-${stage.contentId}`}
               contentId={stage.contentId}
               onComplete={handleStageComplete}
+              timeExpired={timeExpired}
             />
           ) : stage.type === "visual-reveal" ? (
             <VisualReveal
+              key={`${stage.id}-${stage.contentId}`}
               contentId={stage.contentId}
               onComplete={handleStageComplete}
+              timeExpired={timeExpired}
             />
           ) : stage.type === "connection" ? (
             <Connection
+              key={`${stage.id}-${stage.contentId}`}
               contentId={stage.contentId}
               onComplete={handleStageComplete}
+              timeExpired={timeExpired}
             />
           ) : (
             <>

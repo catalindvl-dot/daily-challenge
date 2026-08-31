@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getTimelineChallenge } from "@/data/timeline";
 import type { TimelineEvent } from "@/types/timeline";
 import GameLabel from "@/components/play/GameLabel";
@@ -8,11 +8,13 @@ import GameLabel from "@/components/play/GameLabel";
 type TimelineProps = {
   contentId: string;
   onComplete: (score: number) => void;
+  timeExpired: boolean;
 };
 
 export default function Timeline({
   contentId,
   onComplete,
+  timeExpired,
 }: TimelineProps) {
   const timelineChallenge = getTimelineChallenge(contentId);
 
@@ -76,6 +78,10 @@ export default function Timeline({
   };
 
   const lockTimeline = () => {
+    if (isLocked) {
+      return;
+    }
+
     const sortedCorrectOrder = [
       ...timelineChallenge.events,
     ].sort((a, b) => a.year - b.year);
@@ -114,6 +120,12 @@ export default function Timeline({
 
     onComplete(calculatedScore);
   };
+
+  useEffect(() => {
+    if (timeExpired && !isLocked) {
+      lockTimeline();
+    }
+  }, [timeExpired, isLocked]);
 
   const renderTimelineList = (
     timelineEvents: TimelineEvent[],
@@ -155,21 +167,25 @@ export default function Timeline({
               setDraggedIndex(null);
               setDragOverIndex(null);
             }}
-            className={`rounded-xl border transition ${showDragHandle
-              ? "px-4 py-3 sm:py-4"
-              : "px-3 py-2.5 sm:px-4 sm:py-3"
-              } ${showDragHandle
+            className={`rounded-xl border transition ${
+              showDragHandle
+                ? "px-4 py-3 sm:py-4"
+                : "px-3 py-2.5 sm:px-4 sm:py-3"
+            } ${
+              showDragHandle
                 ? "cursor-grab active:cursor-grabbing"
                 : "cursor-default"
-              } ${showDragHandle &&
-                dragOverIndex === index &&
-                draggedIndex !== index
+            } ${
+              showDragHandle &&
+              dragOverIndex === index &&
+              draggedIndex !== index
                 ? "border-cyan-300/50 bg-cyan-300/10"
                 : "border-white/10 bg-white/[0.03]"
-              } ${showDragHandle && draggedIndex === index
+            } ${
+              showDragHandle && draggedIndex === index
                 ? "opacity-40"
                 : "opacity-100"
-              }`}
+            }`}
           >
             <div className="flex items-center gap-3 text-left sm:gap-4">
               {showDragHandle && (
@@ -232,10 +248,11 @@ export default function Timeline({
           {score !== null && (
             <div className="mt-4 sm:mt-5">
               <p
-                className={`text-base font-semibold sm:text-lg ${score === 100
-                  ? "text-cyan-300"
-                  : "text-slate-300"
-                  }`}
+                className={`text-base font-semibold sm:text-lg ${
+                  score === 100
+                    ? "text-cyan-300"
+                    : "text-slate-300"
+                }`}
               >
                 {score === 100
                   ? "Perfect! You got the timeline right."

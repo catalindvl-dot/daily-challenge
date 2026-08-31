@@ -1,17 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getFlightPathChallenge } from "@/data/flightPath";
 import GameLabel from "@/components/play/GameLabel";
 
 type FlightPathProps = {
   contentId: string;
   onComplete: (accuracy: number) => void;
+  timeExpired: boolean;
 };
 
 export default function FlightPath({
   contentId,
   onComplete,
+  timeExpired,
 }: FlightPathProps) {
   const flightPathChallenge = getFlightPathChallenge(contentId);
 
@@ -76,6 +78,21 @@ export default function FlightPath({
     setGuess(clampedValue);
   };
 
+  const handleLockGuess = () => {
+    if (isLocked) {
+      return;
+    }
+
+    setIsLocked(true);
+    onComplete(accuracy);
+  };
+
+  useEffect(() => {
+    if (timeExpired && !isLocked) {
+      handleLockGuess();
+    }
+  }, [timeExpired, isLocked]);
+
   return (
     <div className="text-center">
       <GameLabel icon="✈" label="Flight Path" />
@@ -128,10 +145,7 @@ export default function FlightPath({
       {!isLocked ? (
         <button
           type="button"
-          onClick={() => {
-            setIsLocked(true);
-            onComplete(accuracy);
-          }}
+          onClick={handleLockGuess}
           className="mt-6 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 sm:mt-8"
         >
           Lock Guess →

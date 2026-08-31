@@ -16,8 +16,43 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kaxiro",
+  metadataBase: new URL("https://kaxiro.com"),
+
+  title: {
+    default: "Kaxiro",
+    template: "%s | Kaxiro",
+  },
+
   description: "Where curiosity comes to play.",
+
+  applicationName: "Kaxiro",
+
+  alternates: {
+    canonical: "/",
+  },
+
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: "Kaxiro",
+    title: "Kaxiro",
+    description: "Where curiosity comes to play.",
+    images: [
+      {
+        url: "/kaxiro-og.png",
+        width: 1672,
+        height: 941,
+        alt: "Kaxiro — Where curiosity comes to play.",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Kaxiro",
+    description: "Where curiosity comes to play.",
+    images: ["/kaxiro-og.png"],
+  },
 };
 
 export default async function RootLayout({

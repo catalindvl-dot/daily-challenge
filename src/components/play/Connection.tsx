@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getConnectionChallenge } from "@/data/connection";
 import { fuzzyMatch } from "@/utils/fuzzyMatch";
 import GameLabel from "@/components/play/GameLabel";
@@ -8,6 +8,7 @@ import GameLabel from "@/components/play/GameLabel";
 type ConnectionProps = {
   contentId: string;
   onComplete: (score: number) => void;
+  timeExpired: boolean;
 };
 
 const scoreLevels = [100, 75, 50, 25];
@@ -15,6 +16,7 @@ const scoreLevels = [100, 75, 50, 25];
 export default function Connection({
   contentId,
   onComplete,
+  timeExpired,
 }: ConnectionProps) {
   const connectionChallenge = getConnectionChallenge(contentId);
 
@@ -67,6 +69,10 @@ export default function Connection({
   };
 
   const handleRevealClue = () => {
+    if (isComplete) {
+      return;
+    }
+
     if (visibleClues >= connectionChallenge.clues.length) {
       setFinalScore(0);
       setIsComplete(true);
@@ -81,6 +87,15 @@ export default function Connection({
     setIsCorrect(null);
     setHasGuessedThisClue(false);
   };
+
+  useEffect(() => {
+    if (timeExpired && !isComplete) {
+      setFinalScore(0);
+      setIsComplete(true);
+      setIsCorrect(false);
+      onComplete(0);
+    }
+  }, [timeExpired, isComplete, onComplete]);
 
   return (
     <div className="text-center">

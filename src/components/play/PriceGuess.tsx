@@ -1,17 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getPriceGuessChallenge } from "@/data/priceGuess";
 import GameLabel from "@/components/play/GameLabel";
 
 type PriceGuessProps = {
   contentId: string;
   onComplete: (accuracy: number) => void;
+  timeExpired: boolean;
 };
 
 export default function PriceGuess({
   contentId,
   onComplete,
+  timeExpired,
 }: PriceGuessProps) {
   const priceGuessChallenge = getPriceGuessChallenge(contentId);
 
@@ -68,6 +70,21 @@ export default function PriceGuess({
     setGuess(newGuess);
     setGuessInput(String(newGuess));
   };
+
+  const handleLockGuess = () => {
+    if (isLocked) {
+      return;
+    }
+
+    setIsLocked(true);
+    onComplete(accuracy);
+  };
+
+  useEffect(() => {
+    if (timeExpired && !isLocked) {
+      handleLockGuess();
+    }
+  }, [timeExpired, isLocked]);
 
   return (
     <div className="text-center">
@@ -134,10 +151,7 @@ export default function PriceGuess({
         <button
           type="button"
           disabled={guessInput === ""}
-          onClick={() => {
-            setIsLocked(true);
-            onComplete(accuracy);
-          }}
+          onClick={handleLockGuess}
           className="mt-6 rounded-xl bg-cyan-300 px-6 py-3 font-medium text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-30 sm:mt-8"
         >
           Lock Guess →

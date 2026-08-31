@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import Summary from "@/components/summary/Summary";
 
 export const metadata: Metadata = {
-  title: "Summary",
+  title: "Sign In",
   robots: {
     index: false,
     follow: false,
   },
 };
 
-export default function SummaryPage() {
-  return <Summary />;
+export default function LoginLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return children;
 }
