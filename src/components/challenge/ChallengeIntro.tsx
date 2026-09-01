@@ -85,7 +85,7 @@ export default function ChallengeIntro({ today }: ChallengeIntroProps) {
   }, [today, hasChallenge]);
 
   return (
-    <main className="relative flex min-h-[calc(100dvh-4rem)] items-start justify-center overflow-hidden px-6 pb-8 pt-32 [@media(max-height:900px)]:pt-20 [@media(max-height:760px)]:pt-12">
+    <main className="relative flex flex-1 items-start justify-center overflow-hidden px-6 pb-8 pt-32 [@media(max-height:900px)]:pt-20 [@media(max-height:760px)]:pt-12">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(34,211,238,0.04)_1px,transparent_1px)] bg-[size:28px_28px]" />
 
       <div
