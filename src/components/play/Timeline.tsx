@@ -49,6 +49,39 @@ export default function Timeline({
     );
   }
 
+  const moveEvent = (
+    index: number,
+    direction: "up" | "down",
+  ) => {
+    if (isLocked) {
+      return;
+    }
+
+    const targetIndex =
+      direction === "up" ? index - 1 : index + 1;
+
+    if (
+      targetIndex < 0 ||
+      targetIndex >= events.length
+    ) {
+      return;
+    }
+
+    setEvents((currentEvents) => {
+      const updatedEvents = [...currentEvents];
+
+      [
+        updatedEvents[index],
+        updatedEvents[targetIndex],
+      ] = [
+        updatedEvents[targetIndex],
+        updatedEvents[index],
+      ];
+
+      return updatedEvents;
+    });
+  };
+
   const handleDrop = (targetIndex: number) => {
     if (
       draggedIndex === null ||
@@ -129,12 +162,12 @@ export default function Timeline({
 
   const renderTimelineList = (
     timelineEvents: TimelineEvent[],
-    showDragHandle: boolean,
+    showControls: boolean,
   ) => {
     return (
       <div
         className={
-          showDragHandle
+          showControls
             ? "space-y-2 sm:space-y-3"
             : "space-y-2"
         }
@@ -142,25 +175,24 @@ export default function Timeline({
         {timelineEvents.map((event, index) => (
           <div
             key={event.id}
-            data-timeline-index={index}
-            draggable={showDragHandle}
+            draggable={showControls}
             onDragStart={() => {
-              if (showDragHandle) {
+              if (showControls) {
                 setDraggedIndex(index);
               }
             }}
             onDragEnter={() => {
-              if (showDragHandle) {
+              if (showControls) {
                 setDragOverIndex(index);
               }
             }}
             onDragOver={(dragEvent) => {
-              if (showDragHandle) {
+              if (showControls) {
                 dragEvent.preventDefault();
               }
             }}
             onDrop={() => {
-              if (showDragHandle) {
+              if (showControls) {
                 handleDrop(index);
               }
             }}
@@ -169,118 +201,39 @@ export default function Timeline({
               setDragOverIndex(null);
             }}
             className={`rounded-xl border transition ${
-              showDragHandle
-                ? "px-4 py-3 sm:py-4"
+              showControls
+                ? "px-3 py-2.5 sm:px-4 sm:py-4"
                 : "px-3 py-2.5 sm:px-4 sm:py-3"
             } ${
-              showDragHandle
-                ? "cursor-grab active:cursor-grabbing"
+              showControls
+                ? "sm:cursor-grab sm:active:cursor-grabbing"
                 : "cursor-default"
             } ${
-              showDragHandle &&
+              showControls &&
               dragOverIndex === index &&
               draggedIndex !== index
-                ? "border-cyan-300/50 bg-cyan-300/10"
+                ? "sm:border-cyan-300/50 sm:bg-cyan-300/10"
                 : "border-white/10 bg-white/[0.03]"
             } ${
-              showDragHandle && draggedIndex === index
-                ? "opacity-40"
+              showControls && draggedIndex === index
+                ? "sm:opacity-40"
                 : "opacity-100"
             }`}
           >
             <div className="flex items-center gap-3 text-left sm:gap-4">
-              {showDragHandle && (
+              {showControls && (
                 <span
-                  className="touch-none select-none text-lg text-slate-600 sm:text-xl"
+                  className="hidden select-none text-xl text-slate-600 sm:block"
                   aria-hidden="true"
-                  onPointerDown={(pointerEvent) => {
-                    if (
-                      pointerEvent.pointerType === "mouse" ||
-                      isLocked
-                    ) {
-                      return;
-                    }
-
-                    pointerEvent.preventDefault();
-
-                    pointerEvent.currentTarget.setPointerCapture(
-                      pointerEvent.pointerId,
-                    );
-
-                    setDraggedIndex(index);
-                    setDragOverIndex(index);
-                  }}
-                  onPointerMove={(pointerEvent) => {
-                    if (
-                      pointerEvent.pointerType === "mouse" ||
-                      draggedIndex === null ||
-                      isLocked
-                    ) {
-                      return;
-                    }
-
-                    pointerEvent.preventDefault();
-
-                    const element = document.elementFromPoint(
-                      pointerEvent.clientX,
-                      pointerEvent.clientY,
-                    );
-
-                    const timelineItem = element?.closest(
-                      "[data-timeline-index]",
-                    );
-
-                    if (!timelineItem) {
-                      return;
-                    }
-
-                    const targetIndex = Number(
-                      timelineItem.getAttribute(
-                        "data-timeline-index",
-                      ),
-                    );
-
-                    if (!Number.isNaN(targetIndex)) {
-                      setDragOverIndex(targetIndex);
-                    }
-                  }}
-                  onPointerUp={(pointerEvent) => {
-                    if (pointerEvent.pointerType === "mouse") {
-                      return;
-                    }
-
-                    pointerEvent.preventDefault();
-
-                    if (
-                      pointerEvent.currentTarget.hasPointerCapture(
-                        pointerEvent.pointerId,
-                      )
-                    ) {
-                      pointerEvent.currentTarget.releasePointerCapture(
-                        pointerEvent.pointerId,
-                      );
-                    }
-
-                    if (dragOverIndex !== null) {
-                      handleDrop(dragOverIndex);
-                    } else {
-                      setDraggedIndex(null);
-                      setDragOverIndex(null);
-                    }
-                  }}
-                  onPointerCancel={() => {
-                    setDraggedIndex(null);
-                    setDragOverIndex(null);
-                  }}
                 >
                   ⋮⋮
                 </span>
               )}
 
-              <div>
+              <div className="min-w-0 flex-1">
                 <p
                   className={
-                    showDragHandle
+                    showControls
                       ? "font-medium text-white"
                       : "text-sm font-medium leading-5 text-white sm:text-base sm:leading-normal"
                   }
@@ -294,6 +247,30 @@ export default function Timeline({
                   </p>
                 )}
               </div>
+
+              {showControls && (
+                <div className="flex shrink-0 gap-1.5 sm:hidden">
+                  <button
+                    type="button"
+                    onClick={() => moveEvent(index, "up")}
+                    disabled={index === 0}
+                    aria-label={`Move ${event.title} up`}
+                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-lg text-slate-300 transition active:bg-white/10 disabled:cursor-not-allowed disabled:opacity-25"
+                  >
+                    ↑
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => moveEvent(index, "down")}
+                    disabled={index === timelineEvents.length - 1}
+                    aria-label={`Move ${event.title} down`}
+                    className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-lg text-slate-300 transition active:bg-white/10 disabled:cursor-not-allowed disabled:opacity-25"
+                  >
+                    ↓
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -314,9 +291,15 @@ export default function Timeline({
       </p>
 
       {!isLocked && (
-        <p className="mt-1.5 text-sm text-slate-500 sm:mt-2">
-          Drag the events to rearrange them.
-        </p>
+        <>
+          <p className="mt-1.5 text-sm text-slate-500 sm:hidden">
+            Use the arrows to rearrange the events.
+          </p>
+
+          <p className="mt-2 hidden text-sm text-slate-500 sm:block">
+            Drag the events to rearrange them.
+          </p>
+        </>
       )}
 
       {!isLocked ? (
