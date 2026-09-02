@@ -57,6 +57,54 @@ export const flightPathChallenges: Record<
     to: "Mexico City",
     distanceKm: 7373,
   },
+
+  "berlin-lisbon": {
+    from: "Berlin",
+    to: "Lisbon",
+    distanceKm: 2305,
+  },
+
+  "toronto-miami": {
+    from: "Toronto",
+    to: "Miami",
+    distanceKm: 1980,
+  },
+
+  "istanbul-delhi": {
+    from: "Istanbul",
+    to: "Delhi",
+    distanceKm: 4570,
+  },
+
+  "seoul-bangkok": {
+    from: "Seoul",
+    to: "Bangkok",
+    distanceKm: 3665,
+  },
+
+  "amsterdam-athens": {
+    from: "Amsterdam",
+    to: "Athens",
+    distanceKm: 2184,
+  },
+
+  "chicago-san-francisco": {
+    from: "Chicago",
+    to: "San Francisco",
+    distanceKm: 2970,
+  },
+
+  "johannesburg-nairobi": {
+    from: "Johannesburg",
+    to: "Nairobi",
+    distanceKm: 2912,
+  },
+
+  "vienna-stockholm": {
+    from: "Vienna",
+    to: "Stockholm",
+    distanceKm: 1288,
+  },
 };
 
 export function getFlightPathChallenge(id: string) {

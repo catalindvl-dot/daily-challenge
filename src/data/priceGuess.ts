@@ -52,6 +52,76 @@ export const priceGuessChallenges: Record<
     currency: "$",
     startingGuess: 250,
   },
+
+  "gaming-laptop": {
+    name: "Gaming Laptop",
+    price: 1499,
+    currency: "$",
+    startingGuess: 900,
+  },
+
+  "electric-scooter": {
+    name: "Electric Scooter",
+    price: 649,
+    currency: "$",
+    startingGuess: 400,
+  },
+
+  "mirrorless-camera": {
+    name: "Mirrorless Camera",
+    price: 999,
+    currency: "$",
+    startingGuess: 600,
+  },
+
+  "wireless-speaker": {
+    name: "Premium Wireless Speaker",
+    price: 349,
+    currency: "$",
+    startingGuess: 200,
+  },
+
+  "air-fryer": {
+    name: "Air Fryer",
+    price: 199,
+    currency: "$",
+    startingGuess: 120,
+  },
+
+  "mechanical-keyboard": {
+    name: "Mechanical Gaming Keyboard",
+    price: 179,
+    currency: "$",
+    startingGuess: 100,
+  },
+
+  drone: {
+    name: "Camera Drone",
+    price: 759,
+    currency: "$",
+    startingGuess: 450,
+  },
+
+  "portable-projector": {
+    name: "Portable Projector",
+    price: 499,
+    currency: "$",
+    startingGuess: 300,
+  },
+
+  "standing-desk": {
+    name: "Electric Standing Desk",
+    price: 599,
+    currency: "$",
+    startingGuess: 350,
+  },
+
+  "cordless-vacuum": {
+    name: "Premium Cordless Vacuum",
+    price: 649,
+    currency: "$",
+    startingGuess: 400,
+  },
 };
 
 export function getPriceGuessChallenge(id: string) {
