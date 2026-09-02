@@ -142,6 +142,7 @@ export default function Timeline({
         {timelineEvents.map((event, index) => (
           <div
             key={event.id}
+            data-timeline-index={index}
             draggable={showDragHandle}
             onDragStart={() => {
               if (showDragHandle) {
@@ -190,8 +191,87 @@ export default function Timeline({
             <div className="flex items-center gap-3 text-left sm:gap-4">
               {showDragHandle && (
                 <span
-                  className="select-none text-lg text-slate-600 sm:text-xl"
+                  className="touch-none select-none text-lg text-slate-600 sm:text-xl"
                   aria-hidden="true"
+                  onPointerDown={(pointerEvent) => {
+                    if (
+                      pointerEvent.pointerType === "mouse" ||
+                      isLocked
+                    ) {
+                      return;
+                    }
+
+                    pointerEvent.preventDefault();
+
+                    pointerEvent.currentTarget.setPointerCapture(
+                      pointerEvent.pointerId,
+                    );
+
+                    setDraggedIndex(index);
+                    setDragOverIndex(index);
+                  }}
+                  onPointerMove={(pointerEvent) => {
+                    if (
+                      pointerEvent.pointerType === "mouse" ||
+                      draggedIndex === null ||
+                      isLocked
+                    ) {
+                      return;
+                    }
+
+                    pointerEvent.preventDefault();
+
+                    const element = document.elementFromPoint(
+                      pointerEvent.clientX,
+                      pointerEvent.clientY,
+                    );
+
+                    const timelineItem = element?.closest(
+                      "[data-timeline-index]",
+                    );
+
+                    if (!timelineItem) {
+                      return;
+                    }
+
+                    const targetIndex = Number(
+                      timelineItem.getAttribute(
+                        "data-timeline-index",
+                      ),
+                    );
+
+                    if (!Number.isNaN(targetIndex)) {
+                      setDragOverIndex(targetIndex);
+                    }
+                  }}
+                  onPointerUp={(pointerEvent) => {
+                    if (pointerEvent.pointerType === "mouse") {
+                      return;
+                    }
+
+                    pointerEvent.preventDefault();
+
+                    if (
+                      pointerEvent.currentTarget.hasPointerCapture(
+                        pointerEvent.pointerId,
+                      )
+                    ) {
+                      pointerEvent.currentTarget.releasePointerCapture(
+                        pointerEvent.pointerId,
+                      );
+                    }
+
+                    if (dragOverIndex !== null) {
+                      handleDrop(dragOverIndex);
+                    } else {
+                      setDraggedIndex(null);
+                      setDragOverIndex(null);
+                    }
+                  }}
+                  onPointerCancel={() => {
+                    setDraggedIndex(null);
+                    setDragOverIndex(null);
+                  }}
                 >
                   ⋮⋮
                 </span>
