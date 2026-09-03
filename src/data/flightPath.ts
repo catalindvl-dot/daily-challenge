@@ -105,6 +105,23 @@ export const flightPathChallenges: Record<
     to: "Stockholm",
     distanceKm: 1288,
   },
+  "lisbon-reykjavik": {
+    from: "Lisbon",
+    to: "Reykjavik",
+    distanceKm: 2953,
+  },
+
+  "dubai-mumbai": {
+    from: "Dubai",
+    to: "Mumbai",
+    distanceKm: 1925,
+  },
+
+  "vancouver-honolulu": {
+    from: "Vancouver",
+    to: "Honolulu",
+    distanceKm: 4354,
+  },
 };
 
 export function getFlightPathChallenge(id: string) {
