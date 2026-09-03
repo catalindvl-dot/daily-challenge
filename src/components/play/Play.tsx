@@ -23,13 +23,13 @@ function getStageTimeLimit(gameType: string) {
   switch (gameType) {
     case "timeline":
     case "connection":
-      return 40;
+      return 20;
 
     case "flight-path":
     case "price-guess":
     case "visual-reveal":
     default:
-      return 30;
+      return 15;
   }
 }
 
